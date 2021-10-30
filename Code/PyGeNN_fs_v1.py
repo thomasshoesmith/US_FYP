@@ -70,7 +70,7 @@ while model.t < 2.0:
     print("%f, %f, %f, %f, %f" % (model.t, v[0], v[1], v[2], v[3]))
 
 
-# Few-Spikes Neuron
+#=========== Few-Spikes Neuron ===========#
 # x = input 
 # K = timesteps K = 1, ... t 
 # α = value representation range (cap)
