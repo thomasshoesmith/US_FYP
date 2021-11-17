@@ -1,5 +1,6 @@
 from pygenn import genn_wrapper, genn_model
 from pygenn.genn_model import create_dpf_class, create_custom_neuron_class
+import numpy as np
 
 # GENN model for FS-Neuron
 
