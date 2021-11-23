@@ -38,7 +38,7 @@ if __name__ == '__main__':
         tf_model = models.load_model('simple_cnn_tf_model')
     else:
         tf_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-        tf_model.fit(x_train, y_train, epochs=10)
+        tf_model.fit(x_train, y_train, epochs=1)
         models.save_model(tf_model, 'simple_cnn_tf_model', save_format='h5')
 
     tf_eval_start_time = perf_counter()
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # Convert and compile ML GeNN model
     mlg_model = Model.convert_tf_model(
         tf_model, converter=converter, connectivity_type=args.connectivity_type,
-        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed, 
+        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed,
         kernel_profiling=args.kernel_profiling)
 
     time = 8 if args.converter == 'few-spike' else 500
