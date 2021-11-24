@@ -49,7 +49,7 @@ if __name__ == '__main__':
     converter = args.build_converter(x_norm, signed_input=False, K=8, norm_time=500)
 
     print("debug1")
-    print(x_norm)
+    #print(x_norm)
 
     # Convert and compile ML GeNN model
     mlg_model = Model.convert_tf_model(
