@@ -8,7 +8,6 @@ from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 from ml_genn.layers.base_neurons import BaseNeurons #base level neuron, replacing "inpit_neurons"
 
 #fs neuron class
-
 fs_relu_input_model = create_custom_neuron_class(
     'fs_relu_input',
     param_names=['K', 'alpha'],
@@ -36,7 +35,7 @@ fs_relu_input_model = create_custom_neuron_class(
     ''',
     is_auto_refractory_required=False)
 
-
+#FSReluInputNeuros class
 class FSReluInputNeurons(BaseNeurons):
 
     def __init__(self, K=10, alpha=25, signed_input=False):
@@ -45,5 +44,13 @@ class FSReluInputNeurons(BaseNeurons):
         self.alpha = alpha
         self.signed_input = signed_input
 
+    def compile(self, mlg_model, layer):
+        model = (fs_relu_signed_input_model if self.signed_input
+                 else fs_relu_input_model)
+        params = {'K' : self.K, 'alpha': self.alpha}
+        vars = {'input': 0.0, 'Vmem': 0.0}
+
+        super(FSReluInputNeurons, self).compile(mlg_model, layer, model,
+                                                params, vars, {})
 
 FSReluInputNeurons(8, 25, False)
