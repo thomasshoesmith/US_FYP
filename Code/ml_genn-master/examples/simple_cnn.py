@@ -47,7 +47,10 @@ if __name__ == '__main__':
 
     # Create a suitable converter to convert TF model to ML GeNN
     converter = args.build_converter(x_norm, signed_input=False, K=8, norm_time=500)
-    print(converter)
+
+    print("debug1")
+    print(x_norm)
+
     # Convert and compile ML GeNN model
     mlg_model = Model.convert_tf_model(
         tf_model, converter=converter, connectivity_type=args.connectivity_type,

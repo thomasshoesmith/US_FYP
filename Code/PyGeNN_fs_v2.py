@@ -37,7 +37,6 @@ fs_relu_input_model = create_custom_neuron_class(
 
 #FSReluInputNeuros class
 class FSReluInputNeurons(BaseNeurons):
-
     def __init__(self, K=10, alpha=25, signed_input=False):
         super(FSReluInputNeurons, self).__init__()
         self.K = K
@@ -54,3 +53,16 @@ class FSReluInputNeurons(BaseNeurons):
                                                 params, vars, {})
 
 FSReluInputNeurons(8, 25, False)
+
+#FS class (function)
+class FewSpikes():
+    def __init__(self, K=10, alpha=25, signed_input=False, norm_data=None):
+        self.K = K
+        self.alpha = alpha
+        self.signed_input = signed_input
+        self.norm_data = norm_data
+
+    def create_input_neurons(self, pre_convert_output):
+        alpha = (self.alpha if pre_convert_output.input_alpha is None
+                 else pre_convert_output.input_alpha)
+        return FSReluInputNeurons(self.K, alpha, self.signed_input)
