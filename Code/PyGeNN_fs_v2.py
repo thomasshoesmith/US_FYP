@@ -7,6 +7,8 @@ from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 
 from ml_genn.layers.base_neurons import BaseNeurons #base level neuron, replacing "inpit_neurons"
 
+#weight update module class
+
 #fs neuron class
 fs_relu_input_model = create_custom_neuron_class(
     'fs_relu_input',

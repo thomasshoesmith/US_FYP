@@ -4,3 +4,6 @@ cd C:\Users\Raz\Documents\GitHub\US_FYP\Code
 
 python PyGeNN_fs_v1.py
 
+
+python simple_cnn.py --connectivity-type sparse
+#currently not working on simplified version 

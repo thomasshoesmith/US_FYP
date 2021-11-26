@@ -24,7 +24,7 @@ def parse_arguments(model_description='ML GeNN model'):
     parser.add_argument('--input-type', default='poisson',
                         choices=[i.value for i in InputType])
     parser.add_argument('--connectivity-type', default='procedural',
-                        choices=[i.value for i in ConnectivityType])
+                        choices=[i.value for i in ConnectivityType]) #sparse
     parser.add_argument('--kernel-profiling', action='store_true')
 
     # ANN conversion options
