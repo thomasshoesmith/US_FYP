@@ -55,6 +55,8 @@ void initialize() {
     // ------------------------------------------------------------------------
     // Synapse groups with dense connectivity
     // ------------------------------------------------------------------------
+    // Synapse groups with kernel connectivity
+    // ------------------------------------------------------------------------
     // Synapse groups with sparse connectivity
 }
 
