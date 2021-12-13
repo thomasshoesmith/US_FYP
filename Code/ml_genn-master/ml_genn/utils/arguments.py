@@ -24,7 +24,7 @@ def parse_arguments(model_description='ML GeNN model'):
     parser.add_argument('--input-type', default='poisson',
                         choices=[i.value for i in InputType])
     parser.add_argument('--connectivity-type', default='procedural',
-                        choices=[i.value for i in ConnectivityType])
+                        choices=[i.value for i in ConnectivityType]) #sparse
     parser.add_argument('--kernel-profiling', action='store_true')
 
     # ANN conversion options
@@ -49,10 +49,10 @@ def parse_arguments(model_description='ML GeNN model'):
         if self.converter == 'few-spike':
             return FewSpike(K=K, signed_input=signed_input, norm_data=[norm_data])
         elif args.converter == 'data-norm':
-            return DataNorm(norm_data=[norm_data], signed_input=signed_input, 
+            return DataNorm(norm_data=[norm_data], signed_input=signed_input,
                             input_type=self.input_type)
         elif args.converter == 'spike-norm':
-            return SpikeNorm(norm_data=[norm_data], norm_time=norm_time, 
+            return SpikeNorm(norm_data=[norm_data], norm_time=norm_time,
                              signed_input=signed_input, input_type=self.input_type)
         else:
             return Simple(signed_input=signed_input, input_type=self.input_type)

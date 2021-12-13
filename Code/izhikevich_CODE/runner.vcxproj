@@ -29,7 +29,7 @@
 	<PropertyGroup>
 		<LinkIncremental Condition="'$(Configuration)'=='Debug'">true</LinkIncremental>
 		<OutDir>../</OutDir>
-		<TargetName>$(ProjectName)_$(Configuration)</TargetName>
+		<TargetName>runner_izhikevich_$(Configuration)</TargetName>
 		<TargetExt>.dll</TargetExt>
 	</PropertyGroup>
 	<ItemDefinitionGroup>

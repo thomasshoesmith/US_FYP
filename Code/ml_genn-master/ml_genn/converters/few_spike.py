@@ -78,17 +78,17 @@ class FewSpike(object):
                     tf_layer.__class__.__name__))
 
     def create_input_neurons(self, pre_convert_output):
-        alpha = (self.alpha if pre_convert_output.input_alpha is None 
+        alpha = (self.alpha if pre_convert_output.input_alpha is None
                  else pre_convert_output.input_alpha)
         return FSReluInputNeurons(self.K, alpha, self.signed_input)
 
     def create_neurons(self, tf_layer, pre_convert_output):
         # Lookup optimised alpha value for neuron
         alpha = (pre_convert_output.layer_alpha[tf_layer]
-                 if tf_layer in pre_convert_output.layer_alpha 
+                 if tf_layer in pre_convert_output.layer_alpha
                  else self.alpha)
         return FSReluNeurons(self.K, alpha)
-    
+
     def pre_convert(self, tf_model):
         # If any normalisation data was provided
         if self.norm_data is not None:
@@ -123,7 +123,7 @@ class FewSpike(object):
 
     def pre_compile(self, mlg_model):
         delay_to_layers = {}
-        
+
         # Loop through layers
         for l in mlg_model.layers:
             # If layer has upstream synaptic connections
@@ -131,10 +131,10 @@ class FewSpike(object):
                 # Calculate max delay from upstream synapses
                 max_delay = max(delay_to_layers[s.source()]
                                 for s in l.upstream_synapses)
-                
+
                 # Delay to this layer is one more than this
                 delay_to_layers[l] = 1 + max_delay
-                
+
                 # Determine the maximum alpha value upstream layers
                 max_alpha = max(s.source().neurons.alpha
                                 for s in l.upstream_synapses)
@@ -150,7 +150,7 @@ class FewSpike(object):
             # Otherwise (layer is an input layer), set this layer's delay as zero
             else:
                 delay_to_layers[l] = 0
-    
+
 
     def post_compile(self, mlg_model):
         # do not allow multiple input or output layers
