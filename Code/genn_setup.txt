@@ -1,5 +1,7 @@
 c:\Users\raz\Anaconda3\Scripts\activate.bat c:\Users\raz\Anaconda3
 
+c:\Users\thoma\Anaconda3\Scripts\activate.bat c:\Users\thoma\Anaconda3
+
 cd C:\Users\Raz\Documents\GitHub\US_FYP\Code
 
 python PyGeNN_fs_v1.py
