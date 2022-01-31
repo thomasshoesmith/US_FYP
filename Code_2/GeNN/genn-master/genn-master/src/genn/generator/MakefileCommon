@@ -1,0 +1,52 @@
+# Include common makefile
+include ../MakefileCommon
+
+# Check required environment variable names are set
+ifndef BACKEND_NAME
+    $(error Environment variable BACKEND_NAME must be defined)
+endif
+ifndef BACKEND_NAMESPACE
+    $(error Environment variable BACKEND_NAMESPACE must be defined)
+endif
+ifndef MODEL
+    $(error Environment variable MODEL must be defined)
+endif
+ifndef GENERATOR_PATH
+    $(error Environment variable GENERATOR_PATH must be defined)
+endif
+
+# Default to C++11 but allow this to overriden
+CXX_STANDARD			?=c++11
+
+# BUILD_MODEL_INCLUDE contains a colon-seperated list of additional include paths.
+# substitute :s for spaces and then prepend each path with -I so it gets turned into an include directory
+CXXFLAGS		+=$(patsubst %,-I%,$(subst :, ,$(BUILD_MODEL_INCLUDE)))
+
+# Add compiler and linker flags to link libGeNN and correct backend; and to configure generator to use backend
+LDFLAGS			+= -L$(LIBRARY_DIRECTORY)  -lgenn_$(BACKEND_NAME)_backend$(GENN_PREFIX) -lgenn$(GENN_PREFIX)
+CXXFLAGS		+= -I$(GENN_DIR)/include/genn/backends/$(BACKEND_NAME) -DMODEL=\"$(MODEL)\" -DBACKEND_NAMESPACE=$(BACKEND_NAMESPACE)
+
+# Determine full path to generator and backend
+GENERATOR		:=$(GENERATOR_PATH)/generator$(GENN_PREFIX)
+BACKEND			:=$(LIBRARY_DIRECTORY)/libgenn_$(BACKEND_NAME)_backend$(GENN_PREFIX).a
+
+.PHONY: all clean libgenn backend
+
+all: $(GENERATOR)
+
+-include $(DEPS)
+
+$(GENERATOR): generator.cc generator.d libgenn backend
+	mkdir -p $(@D)
+	$(CXX) -std=$(CXX_STANDARD) $(CXXFLAGS) generator.cc -o $@ $(LDFLAGS)
+
+generator.d: ;
+
+libgenn:
+	if [ -w $(LIBRARY_DIRECTORY) ]; then $(MAKE) -C $(GENN_DIR)/src/genn/genn; fi;
+
+backend:
+	if [ -w $(LIBRARY_DIRECTORY) ]; then $(MAKE) -C $(GENN_DIR)/src/genn/backends/$(BACKEND_NAME); fi;
+
+clean:
+	rm -f generator.d $(GENERATOR)
