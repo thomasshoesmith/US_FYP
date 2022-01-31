@@ -3,12 +3,12 @@ from tensorflow.keras import models, layers, datasets
 from ml_genn import Model
 from ml_genn.utils import parse_arguments, raster_plot
 import numpy as np
-from six import iteritems
-from time import perf_counter
+import tensorflow_datasets as tfds
+
 
 
 if __name__ == '__main__':
-    args = parse_arguments('KYP_P11_FS_MNIST model')
+    args = parse_arguments('Simple CNN classifier model')
     print('arguments: ' + str(vars(args)))
 
     for gpu in tf.config.experimental.list_physical_devices('GPU'):
@@ -32,40 +32,17 @@ if __name__ == '__main__':
         layers.Dense(128, activation='relu', use_bias=False),
         layers.Dense(64, activation='relu', use_bias=False),
         layers.Dense(y_train.max() + 1, activation='softmax', use_bias=False),
-    ], name='KYP_P11_FS_MNIST')
+    ], name='simple_cnn')
 
     if args.reuse_tf_model:
-        tf_model = models.load_model('KYP_P11_FS_MNIST')
+        tf_model = models.load_model('KYP_P12_FS_CIFAR10')
     else:
         tf_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
         tf_model.fit(x_train, y_train, epochs=2)
-        models.save_model(tf_model, 'KYP_P11_FS_MNIST', save_format='h5')
+        models.save_model(tf_model, 'KYP_P12_FS_CIFAR10', save_format='h5')
 
-    tf_eval_start_time = perf_counter()
+    #tf_eval_start_time = perf_counter()
     tf_model.evaluate(x_test, y_test)
-    print("TF evaluation:%f" % (perf_counter() - tf_eval_start_time))
+    #print("TF evaluation:%f" % (perf_counter() - tf_eval_start_time))
 
-    # Create a suitable converter to convert TF model to ML GeNN
-    converter = args.build_converter(x_norm, signed_input=False, K=8, norm_time=500)
-
-    # Convert and compile ML GeNN model
-    mlg_model = Model.convert_tf_model(
-        tf_model, converter=converter, connectivity_type=args.connectivity_type,
-        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed, 
-        kernel_profiling=args.kernel_profiling)
-
-    time = 8 if args.converter == 'few-spike' else 500
-    mlg_eval_start_time = perf_counter()
-    acc, spk_i, spk_t = mlg_model.evaluate([x_test], [y_test], time, save_samples=args.save_samples)
-    print("MLG evaluation:%f" % (perf_counter() - mlg_eval_start_time))
-
-    if args.kernel_profiling:
-        print("Kernel profiling:")
-        for n, t in iteritems(mlg_model.get_kernel_times()):
-            print("\t%s: %fs" % (n, t))
-
-    # Report ML GeNN model results
-    print('Accuracy of KYP_P11_FS_MNIST GeNN model: {}%'.format(acc[0]))
-    if args.plot:
-        neurons = [l.neurons.nrn for l in mlg_model.layers]
-        raster_plot(spk_i, spk_t, neurons, time=time)
+    
