@@ -9,3 +9,15 @@ python PyGeNN_fs_v1.py
 
 python simple_cnn.py --connectivity-type sparse
 #currently not working on simplified version 
+
+
+
+FRESH INSTALL SHORTCUTS
+
+// after configuring Anaconda with VS dev
+
+conda install swig
+
+msbuild genn.sln /t:Build /p:Configuration=Release_DLL
+
+copy /Y lib\genn*Release_DLL.* pygenn\genn_wrapper
