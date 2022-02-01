@@ -46,3 +46,4 @@ if __name__ == '__main__':
     #print("TF evaluation:%f" % (perf_counter() - tf_eval_start_time))
 
     
+#memory usage pros and cons
