@@ -14,41 +14,38 @@ if __name__ == '__main__':
         tf.config.experimental.set_memory_growth(gpu, True)
 
     # Retrieve and normalise MNIST dataset
-    (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-    print(x_train[0].shape)
-    print(x_train.shape)
-    #print(x_train[0])
-    x_train = x_train.reshape((-1, 28, 28, 1)) / 255.0
-    print(x_train[0].shape)
-    print(args.n_train_samples)
-    #print(x_train[0])
-    #y_train = y_train[:args.n_train_samples]
-    #x_test = x_test[:args.n_test_samples].reshape((-1, 28, 28, 1)) / 255.0
-    #y_test = y_test[:args.n_test_samples]
-    #x_norm = x_train[np.random.choice(x_train.shape[0], args.n_norm_samples, replace=False)]
-"""
-    # Create, train and evaluate TensorFlow model
-    tf_model = models.Sequential([
-        layers.Conv2D(16, 5, padding='valid', activation='relu', use_bias=False, input_shape=x_train.shape[1:]),
-        layers.AveragePooling2D(2),
-        layers.Conv2D(8, 5, padding='valid', activation='relu', use_bias=False),
-        layers.AveragePooling2D(2),
-        layers.Flatten(),
-        layers.Dense(128, activation='relu', use_bias=False),
-        layers.Dense(64, activation='relu', use_bias=False),
-        layers.Dense(y_train.max() + 1, activation='softmax', use_bias=False),
-    ], name='simple_cnn')
+    (mnist_x_train, mnist_y_train),(mnist_x_test, mnist_y_test) = \
+    datasets.mnist.load_data()
 
-    if args.reuse_tf_model:
-        tf_model = models.load_model('KYP_P12_FS_CIFAR10')
-    else:
-        tf_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-        tf_model.fit(x_train, y_train, epochs=2)
-        models.save_model(tf_model, 'KYP_P12_FS_CIFAR10', save_format='h5')
+    # Testing Shape of mnist
+    print("\n### MNIST ###")
+    print("individual MNIST shape:\t\t", mnist_x_train[0].shape)
+    print("Pre Overall MNIST shape:\t", mnist_x_train.shape)
+    mnist_x_train = mnist_x_train.reshape((-1, 28, 28, 1)) / 255.0
+    print("Post Overall MNIST shape:\t", mnist_x_train.shape)
 
-    #tf_eval_start_time = perf_counter()
-    tf_model.evaluate(x_test, y_test)
-    #print("TF evaluation:%f" % (perf_counter() - tf_eval_start_time))
-"""
+
+
+    # Retrieve and normalise CIFAR10 dataset
+    (cifar10_x_train, cifar10_y_train),(cifar10_x_test, cifar10_y_test) = \
+    datasets.cifar10.load_data()
+
+    # Testing Shape of mnist
+    print("\n### CIFAR10 ###")
+    print("individual CIFAR10 shape:\t", cifar10_x_train[0].shape)
+    print("Pre Overall CIFAR10 shape:\t", cifar10_x_train.shape)
+    #cifar10_x_train = cifar10_x_train.reshape((1000, 3, 32, 32))
+    #print("Post Overall CIFAR10 shape:\t", cifar10_x_train.shape)
+
+
+    """
+    print("\n### MNIST ###")
+    print(mnist_x_train[0])
+
+    print("\n### CIFAR10 ###")
+    print(cifar10_x_train[0])
+    """
+
+
 
 #memory usage pros and cons
