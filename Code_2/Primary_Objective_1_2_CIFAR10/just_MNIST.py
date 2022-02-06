@@ -3,7 +3,6 @@ from tensorflow.keras import models, layers, datasets
 from ml_genn import Model
 from ml_genn.utils import parse_arguments, raster_plot
 import numpy as np
-import tensorflow_datasets as tfds
 
 
 
@@ -16,12 +15,18 @@ if __name__ == '__main__':
 
     # Retrieve and normalise MNIST dataset
     (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-    x_train = x_train[:args.n_train_samples].reshape((-1, 28, 28, 1)) / 255.0
-    y_train = y_train[:args.n_train_samples]
-    x_test = x_test[:args.n_test_samples].reshape((-1, 28, 28, 1)) / 255.0
-    y_test = y_test[:args.n_test_samples]
-    x_norm = x_train[np.random.choice(x_train.shape[0], args.n_norm_samples, replace=False)]
-
+    print(x_train[0].shape)
+    print(x_train.shape)
+    #print(x_train[0])
+    x_train = x_train.reshape((-1, 28, 28, 1)) / 255.0
+    print(x_train[0].shape)
+    print(args.n_train_samples)
+    #print(x_train[0])
+    #y_train = y_train[:args.n_train_samples]
+    #x_test = x_test[:args.n_test_samples].reshape((-1, 28, 28, 1)) / 255.0
+    #y_test = y_test[:args.n_test_samples]
+    #x_norm = x_train[np.random.choice(x_train.shape[0], args.n_norm_samples, replace=False)]
+"""
     # Create, train and evaluate TensorFlow model
     tf_model = models.Sequential([
         layers.Conv2D(16, 5, padding='valid', activation='relu', use_bias=False, input_shape=x_train.shape[1:]),
@@ -44,6 +49,6 @@ if __name__ == '__main__':
     #tf_eval_start_time = perf_counter()
     tf_model.evaluate(x_test, y_test)
     #print("TF evaluation:%f" % (perf_counter() - tf_eval_start_time))
+"""
 
-    
 #memory usage pros and cons

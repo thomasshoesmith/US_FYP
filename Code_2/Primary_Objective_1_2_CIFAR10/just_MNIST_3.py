@@ -9,7 +9,7 @@ import numpy as np
 
 
 (x_train, y_train), (x_test, y_test) = tfds.as_numpy(tfds.load(
-    'cifar10',
+    'mnist',
     split=['train', 'test'],
     batch_size=-1,
     as_supervised=True,
@@ -37,6 +37,3 @@ model.compile(
 #model.fit(x_train, y_train, epochs=2, validation_data=ds_test)
 
 """
-
-
-
