@@ -7,6 +7,9 @@ import numpy as np
 from six import iteritems
 from time import perf_counter
 
+def initializer(shape, dtype=None):
+    stddev = np.sqrt(2.0 / float(shape[0] * shape[1] * shape[3]))
+    return tf.random.normal(shape, dtype=dtype, stddev=stddev)
 
 if __name__ == '__main__':
     args = parse_arguments('Simple CNN classifier model')
@@ -27,17 +30,40 @@ if __name__ == '__main__':
     x_norm = x_train[np.random.choice(x_train.shape[0], args.n_norm_samples, replace=False)]
 
 
-    #regularizer = regularizers.l2(0.0001)
+    regularizer = regularizers.l2(0.0001)
 
     # Create, train and evaluate TensorFlow model
     tf_model = models.Sequential([
-        layers.Conv2D(32, (3,3), padding='same', activation='relu',  use_bias=False, input_shape=x_train.shape[1:]),
-        layers.Conv2D(32, (3,3), padding='same', activation='relu',  use_bias=False),
+        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, input_shape=x_train.shape[1:],
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
+        layers.Dropout(0.3),
+        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False,
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
-        layers.Dropout(0.2),
+
+        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False,
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
+        layers.Dropout(0.4),
+        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False,
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
+        layers.AveragePooling2D(2),
+
+        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False,
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
+        layers.Dropout(0.4),
+        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False,
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
+        layers.Dropout(0.4),
+        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False,
+                      kernel_initializer=initializer, kernel_regularizer=regularizer),
+        layers.AveragePooling2D(2),
 
         layers.Flatten(),
-        layers.Dense(y_train.max() + 1, activation='softmax', use_bias=False),
+        layers.Dense(4096, activation="relu", use_bias=False, kernel_regularizer=regularizer),
+        layers.Dropout(0.5),
+        layers.Dense(4096, activation="relu", use_bias=False, kernel_regularizer=regularizer),
+        layers.Dropout(0.5),
+        layers.Dense(y_train.max() + 1, activation="softmax", use_bias=False, kernel_regularizer=regularizer),
 
     ], name='CIFAR10_cnn')
 
@@ -119,7 +145,7 @@ if __name__ == '__main__':
         tf_model = models.load_model('KYP_P12_FS_CIFAR10')
     else:
         tf_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-        tf_model.fit(x_train, y_train, epochs=10)
+        tf_model.fit(x_train, y_train, epochs=1)
         models.save_model(tf_model, 'KYP_P12_FS_CIFAR10', save_format='h5')
 
     tf_eval_start_time = perf_counter()
