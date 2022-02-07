@@ -60,47 +60,47 @@ if __name__ == '__main__':
 
     # Create, train and evaluate TensorFlow model
     tf_model = models.Sequential([
-        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, input_shape=x_train.shape[1:], 
+        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, input_shape=x_train.shape[1:],
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.3),
-        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, 
+        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
 
-        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
 
-        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
 
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
 
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
+        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
 
@@ -142,9 +142,9 @@ if __name__ == '__main__':
     # Convert and compile ML GeNN model
     mlg_model = Model.convert_tf_model(
         tf_model, converter=converter, connectivity_type=args.connectivity_type,
-        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed, 
+        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed,
         kernel_profiling=args.kernel_profiling)
-    
+
     time = 10 if args.converter == 'few-spike' else 2500
     mlg_eval_start_time = perf_counter()
     acc, spk_i, spk_t = mlg_model.evaluate([x_test], [y_test], time, save_samples=args.save_samples)
