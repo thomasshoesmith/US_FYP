@@ -59,6 +59,8 @@ if __name__ == '__main__':
     """
     # full scale vgg16
 
+    # also check https://gist.github.com/baraldilorenzo/07d7802847aaad0a35d3
+
     tf_model = models.Sequential([
         layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, input_shape=x_train.shape[1:],
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
