@@ -56,12 +56,12 @@ fs_relu_upstream_signed_input_model = create_custom_neuron_class(
 
     // Calculate magic constants. For RelU hT=h=T
     const scalar hT = $(scale) * (1 << (kInt - (1 + pipeTimestep)));
-    
+
     // Split timestep into interleaved positive and negative
     // **NOTE** sign is flipped compared to input model as we want sign of PREVIOUS timestep
     const scalar dSign = ((pipeTimestep % 2) == 0) ? -1.0 : 1.0;
     const scalar d = dSign * $(upstreamScale) * (1 << (((kInt - pipeTimestep) % kInt) / 2));
-    
+
     // Accumulate input
     // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
     $(Fx) += ($(Isyn) * d);
@@ -95,7 +95,7 @@ class FSReluNeurons(Neurons):
         for u in layer.upstream_synapses:
             # Get neuron object associated with the source layer
             nrn = u.source().neurons
-            
+
             # If the upstream neuron is some sort of FsRelu
             # **YUCK** is there a better way of accessing the FsReluNeurons type?
             upstream_relu = isinstance(nrn, type(self))
@@ -105,8 +105,8 @@ class FSReluNeurons(Neurons):
                 if nrn.K != self.K:
                     raise ValueError("K parameters of FS ReLU neurons must "
                                      "match across whole model")
-                
-                # Check that all upstream neurons have the same alpha 
+
+                # Check that all upstream neurons have the same alpha
                 if upstream_alpha is None:
                     upstream_alpha = nrn.alpha
                 elif upstream_alpha != nrn.alpha:
@@ -120,11 +120,11 @@ class FSReluNeurons(Neurons):
                 elif upstream_signed != nrn_signed:
                     raise ValueError("All upstream FS ReLU input neurons "
                                      "must  have the same signedness")
-                    
+
             # Otherwise, give error
             else:
                 raise ValueError("FS neurons can only be connected "
-                                 "to other FS neurons") 
+                                 "to other FS neurons")
 
         # If no upstream population is found, use our own alpha
         # **NOTE** this shouldn't be necessary
@@ -135,7 +135,7 @@ class FSReluNeurons(Neurons):
         model = (fs_relu_upstream_signed_input_model if upstream_signed == True
                  else fs_relu_model)
 
-        params = {'K': self.K, 'alpha': self.alpha, 
+        params = {'K': self.K, 'alpha': self.alpha,
                   'upstreamAlpha': upstream_alpha}
         vars = {'Fx': 0.0, 'Vmem': 0}
 
