@@ -1,4 +1,4 @@
-from pygenn.genn_model import create_dpf_class, create_custom_neuron_class
+3from pygenn.genn_model import create_dpf_class, create_custom_neuron_class
 from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 from ml_genn.layers.input_neurons import InputNeurons
 
@@ -6,12 +6,24 @@ fp_relu_input_model = create_custom_neuron_class(
     'fp_relu_input',
     param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
     derived_params=[("scale", create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))())], #TODO pars[0] = K, pars[1] = Alpha
-    var_name_types=[('input', 'scalar', VarAccess_READ_ONLY_DUPLICATE), ('Vmem', 'scalar')],
+    var_name_types=[('input', 'scalar',
+                    VarAccess_READ_ONLY_DUPLICATE),
+                    ('Vmem', 'scalar'),
+                    ('max_exp', 'scalar'),
+                    ('mantissa_one', 'integer')
+                    ('relative_x', 'scalar'),
+                    ('exponent', 'scalar')], #is this okay to do? TODO ask TN if it should be int instead
+
+    #//how to add #include <math.h> in the c-file # TODO:
     sim_code='''
+    //
+    #define MAX(x, y) (((x) > (y)) ? (x) : (y))
+    #define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
     // Convert K to integer
     const int kInt = (int)$(K);
 
-    // Convert elim to integer
+    // *Convert elim to integer
     const int elimInt = (int)$(elim);
 
     // Get timestep within presentation
@@ -20,6 +32,23 @@ fp_relu_input_model = create_custom_neuron_class(
     // If this is the first timestep, apply input
     if(pipeTimestep == 0) {
         $(Vmem) = $(input);
+
+        // Calculates the maximum mantissa value
+        max_exp = pow(2, elim) - 1;
+
+        // Calculate what integer equivalent of mantissa of one will be
+        mantissa_one = pow(2, kInt - elimInt);
+
+        // Calculate fraction of alpga we need to encode
+        relative_x = input / alpha
+
+        // Calculate integer exponent (when < 1) and clamp
+        exponent = ceil(log2(relative_x))
+        //# TODO: lookup fmax, fmaxf, fmaxl
+
+
+
+
     }
 
     const scalar hT = $(scale) * (1 << (kInt - (1 + pipeTimestep)));
