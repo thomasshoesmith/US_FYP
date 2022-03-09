@@ -13,9 +13,8 @@ fp_relu_input_model = create_custom_neuron_class(
                     ('mantissa_one', 'scalar'),
                     ('relative_x', 'scalar'),
                     ('exponent', 'scalar'),
-                    ('exponent_value', 'scalar')], #is this okay to do? TODO ask TN if it should be int instead
+                    ('exponent_value', 'scalar')],
 
-    #//how to add #include <math.h> in the c-file # TODO:
     sim_code='''
     // Convert K to integer
     const int kInt = (int)$(K);
@@ -48,7 +47,7 @@ fp_relu_input_model = create_custom_neuron_class(
     }
 
     const scalar hT = $(scale) * (1 << (kInt - (1 + pipeTimestep)));
-    ''', ## TODO: Ask TN about support_code:	string with the support code
+    ''',
     threshold_condition_code='''
     $(Vmem) >= hT
     ''',
