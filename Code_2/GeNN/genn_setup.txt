@@ -13,11 +13,15 @@ python simple_cnn.py --connectivity-type sparse
 
 
 FRESH INSTALL SHORTCUTS
+//for PyGeNN
 
 // after configuring Anaconda with VS dev
 
 conda install swig
 
+// cd to GeNN directory
 msbuild genn.sln /t:Build /p:Configuration=Release_DLL
 
 copy /Y lib\genn*Release_DLL.* pygenn\genn_wrapper
+
+python setup.py develop

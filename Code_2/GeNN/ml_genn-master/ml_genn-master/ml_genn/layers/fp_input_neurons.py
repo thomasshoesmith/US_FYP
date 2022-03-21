@@ -5,15 +5,10 @@ from ml_genn.layers.input_neurons import InputNeurons
 fp_relu_input_model = create_custom_neuron_class(
     'fp_relu_input',
     param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
-    derived_params=[("scale", create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))())], #TODO pars[0] = K, pars[1] = Alpha
-    var_name_types=[('input', 'scalar',
-                    VarAccess_READ_ONLY_DUPLICATE),
-                    ('Vmem', 'scalar'),
-                    ('max_exp', 'scalar'),
-                    ('mantissa_one', 'scalar'),
-                    ('relative_x', 'scalar'),
-                    ('exponent', 'scalar'),
-                    ('exponent_value', 'scalar')],
+    derived_params=[("mantissa_scale", create_dpf_class(lambda pars, dt: pars[1] * 2 ** -fminf((2** pars[2] - 1), fmaxf(0.0, ceil(log2(1 / ( input / pars[1]))))) * 2 * 2**(-pars[0]))),
+                    ("exponent_scale", create_dpf_class(lambda pars, dt: 16.0 * 2 ** ( - pars[2])))], #TODO pars[0] = K, pars[1] = Alpha
+
+    var_name_types=[('input', 'scalar', VarAccess_READ_ONLY_DUPLICATE), ('Vmem', 'scalar')],
 
     sim_code='''
     // Convert K to integer
@@ -28,25 +23,10 @@ fp_relu_input_model = create_custom_neuron_class(
     // If this is the first timestep, apply input
     if(pipeTimestep == 0) {
         $(Vmem) = $(input);
-
-        // Calculates the maximum mantissa value
-        max_exp = pow(2, elim) - 1;
-
-        // Calculate what integer equivalent of mantissa of one will be
-        mantissa_one = pow(2, kInt - elimInt);
-
-        // Calculate fraction of alpga we need to encode
-        relative_x = input / alpha;
-
-        // Calculate integer exponent (when < 1) and clamp
-        exponent = ceil(log2(relative_x));
-        exponent = fmaxf(-max_exp, fminf(0, exponent));
-
-        // Calculate value this exponent will represent
-        exponent_value = pow(2, exponent);
     }
 
     const scalar hT = $(scale) * (1 << (kInt - (1 + pipeTimestep)));
+
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -70,3 +50,17 @@ class FPReluInputNeurons(InputNeurons):
 
         super(FPReluInputNeurons, self).compile(mlg_model, layer, model,
                                                 params, vars, {})
+
+
+# sparse_individualg
+# dense_individualg (caps) (use this one)
+
+
+"""
+model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
+    pop1, pop1, <= connections
+    "StaticPulse" (predifined update model, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
+    "ExpCond" ("DeltaCurr", should work), ps_p (parameters), {} (initial values for variables),
+    init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
+
+"""

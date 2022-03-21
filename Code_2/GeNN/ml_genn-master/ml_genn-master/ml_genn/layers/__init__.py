@@ -11,9 +11,6 @@ from ml_genn.layers.poisson_input_neurons import PoissonInputNeurons
 from ml_genn.layers.if_input_neurons import IFInputNeurons
 from ml_genn.layers.fs_input_neurons import FSReluInputNeurons
 
-from ml_genn.layers.fp_input_neurons import FPReluInputNeurons
-from ml_genn.layers.fp_neurons import FPReluNeurons
-
 from ml_genn.layers.identity_synapses import IdentitySynapses
 from ml_genn.layers.dense_synapses import DenseSynapses
 from ml_genn.layers.conv2d_synapses import Conv2DSynapses
@@ -29,3 +26,7 @@ from ml_genn.layers.avepool2d import AvePool2D
 from ml_genn.layers.avepool2d_dense import AvePool2DDense
 from ml_genn.layers.avepool2d_conv2d import AvePool2DConv2D
 from ml_genn.layers.input_layer import InputLayer
+
+# added ref: TS
+from ml_genn.layers.fp_input_neurons import FPReluInputNeurons
+from ml_genn.layers.fp_neurons import FPReluNeurons

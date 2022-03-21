@@ -8,7 +8,6 @@ from ml_genn.converters import Simple
 from ml_genn.converters import DataNorm
 from ml_genn.converters import SpikeNorm
 from ml_genn.converters import FewSpike
-from ml_genn.converters import FloatingPoint
 
 
 def parse_arguments(model_description='ML GeNN model'):
@@ -49,14 +48,9 @@ def parse_arguments(model_description='ML GeNN model'):
     def build_converter(self, norm_data, signed_input=False, K=8, norm_time=500):
         if self.converter == 'few-spike':
             return FewSpike(K=K, signed_input=signed_input, norm_data=[norm_data])
-        
-        elif args.converter == 'floating-point':
-            return FloatingPoint(K=K, norm_data=[norm_data])
-                    
         elif args.converter == 'data-norm':
             return DataNorm(norm_data=[norm_data], signed_input=signed_input, 
                             input_type=self.input_type)
-        
         elif args.converter == 'spike-norm':
             return SpikeNorm(norm_data=[norm_data], norm_time=norm_time, 
                              signed_input=signed_input, input_type=self.input_type)
