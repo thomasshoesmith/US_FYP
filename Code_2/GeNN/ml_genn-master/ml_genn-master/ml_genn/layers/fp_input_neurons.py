@@ -59,8 +59,8 @@ class FPReluInputNeurons(InputNeurons):
 """
 model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
     pop1, pop1, <= connections
-    "StaticPulse" (predifined update model, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
-    "ExpCond" ("DeltaCurr", should work), ps_p (parameters), {} (initial values for variables),
+    "StaticPulse" (predefined update model, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
+    "ExpCond" ("DeltaCurr"!, should work), ps_p (parameters), {} (initial values for variables),
     init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
 
 """

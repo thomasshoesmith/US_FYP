@@ -9,7 +9,7 @@ import numpy as np
 from six import iterkeys, itervalues
 from . import genn_wrapper
 from .genn_wrapper.Models import (VarInit, VarReference, WUVarReference,
-                                  VarInitVector, VarRefVector, 
+                                  VarInitVector, VarRefVector,
                                   VarReferenceVector, WUVarReferenceVector)
 from .genn_wrapper.StlContainers import DoubleVector
 
@@ -165,7 +165,7 @@ def var_ref_space_to_var_refs(model, var_ref_space):
     return model.make_var_references(
         VarReferenceVector([var_ref_space[v.name][0]
                             for v in model.get_var_refs()]))
-                                                
+
 def var_ref_space_to_wu_var_refs(model, var_ref_space):
     """Convert a var_ref_space dict to WUVarReferences
 
@@ -221,7 +221,7 @@ class Variable(object):
         variable_name   -- string name of the variable
         variable_type   -- string type of the variable
         values          -- iterable, single value or VarInit instance
-        group           -- pygenn.genn_groups.Group this  
+        group           -- pygenn.genn_groups.Group this
                            variable is associated with
         """
         self.name = variable_name
