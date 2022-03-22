@@ -49,7 +49,7 @@ from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 # ----------------------------------------------------------------------------
 
 FP_PARAM =  {"K":       8.0,      # K timestep length
-             "alpha":   10.0,     # alpha "max" Value
+             "alpha":   20.0,     # alpha "max" Value
              "elim":    4.0}      # elim number of bits to represent the exponent
 
 TIMESTEP = 1.0
@@ -86,37 +86,19 @@ fp_relu_input_model = create_custom_neuron_class(
 
     // If this is the first timestep, apply input
     if(pipeTimestep == 0) {
+        $(Vmem) = $(input);
         $(scaleVal) = AlphaInt * pow(2, - fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(Vmem) / AlphaInt))))));
 
         // needs to be cleaned up
         // scaleVal can be derived from exponent
         //# TODO: update variable names to logial ones
-        //$(exponent) = fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(Vmem) / AlphaInt)))));
-        //printf("%.1f", $(exponent));
-
-
+        $(exponent) = fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(Vmem) / AlphaInt)))));
+        printf("%.6f", $(exponent));
     }
 
-    if(pipeTimestep == elimInt) {
-        $(Vmem) = $(input);
-    }
+    const scalar hT = $(scaleVal) / (1 << pipeTimestep);
 
-
-    const scalar hT = 0;
-
-    $(measure) = 0;
-
-
-    if(pipeTimestep > elimInt) {
-        const scalar hT = $(scaleVal) / (1 << (pipeTimestep - elimInt + 1));
-
-        $(measure) = $(scaleVal) / (1 << (pipeTimestep - elimInt + 1));
-    } else {
-        const scalar hT = 0;
-
-        $(measure) = 0;
-    }
-
+    $(measure) = $(scaleVal) / (1 << pipeTimestep);
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -135,7 +117,7 @@ model = GeNNModel("float", "FP_singleNetwork")
 model.dT = TIMESTEP
 
 # Initial values to initialise all neurons to
-ini = {"input": 17.0,  # input Value
+ini = {"input": 17,  # input Value
        "Vmem": 0.0,   # voltage membrane value
        "scaleVal": 0.0,
        "measure": 0.0,  #testing
@@ -171,7 +153,7 @@ axis.plot(v)
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FP Neuron")
-plt.show()
+#plt.show()
 
 
 

@@ -28,6 +28,8 @@ unsigned int* glbSpkneuron1;
 scalar* inputneuron1;
 scalar* Vmemneuron1;
 scalar* scaleValneuron1;
+scalar* measureneuron1;
+scalar* exponentneuron1;
 
 // ------------------------------------------------------------------------
 // custom update variables
@@ -77,10 +79,24 @@ void pushscaleValneuron1ToDevice(bool uninitialisedOnly) {
 void pushCurrentscaleValneuron1ToDevice(bool uninitialisedOnly) {
 }
 
+void pushmeasureneuron1ToDevice(bool uninitialisedOnly) {
+}
+
+void pushCurrentmeasureneuron1ToDevice(bool uninitialisedOnly) {
+}
+
+void pushexponentneuron1ToDevice(bool uninitialisedOnly) {
+}
+
+void pushCurrentexponentneuron1ToDevice(bool uninitialisedOnly) {
+}
+
 void pushneuron1StateToDevice(bool uninitialisedOnly) {
     pushinputneuron1ToDevice(uninitialisedOnly);
     pushVmemneuron1ToDevice(uninitialisedOnly);
     pushscaleValneuron1ToDevice(uninitialisedOnly);
+    pushmeasureneuron1ToDevice(uninitialisedOnly);
+    pushexponentneuron1ToDevice(uninitialisedOnly);
 }
 
 
@@ -111,10 +127,24 @@ void pullscaleValneuron1FromDevice() {
 void pullCurrentscaleValneuron1FromDevice() {
 }
 
+void pullmeasureneuron1FromDevice() {
+}
+
+void pullCurrentmeasureneuron1FromDevice() {
+}
+
+void pullexponentneuron1FromDevice() {
+}
+
+void pullCurrentexponentneuron1FromDevice() {
+}
+
 void pullneuron1StateFromDevice() {
     pullinputneuron1FromDevice();
     pullVmemneuron1FromDevice();
     pullscaleValneuron1FromDevice();
+    pullmeasureneuron1FromDevice();
+    pullexponentneuron1FromDevice();
 }
 
 
@@ -139,6 +169,14 @@ scalar* getCurrentVmemneuron1(unsigned int batch) {
 
 scalar* getCurrentscaleValneuron1(unsigned int batch) {
     return scaleValneuron1;
+}
+
+scalar* getCurrentmeasureneuron1(unsigned int batch) {
+    return measureneuron1;
+}
+
+scalar* getCurrentexponentneuron1(unsigned int batch) {
+    return exponentneuron1;
 }
 
 
@@ -176,6 +214,8 @@ void allocateMem() {
     inputneuron1 = new scalar[1];
     Vmemneuron1 = new scalar[1];
     scaleValneuron1 = new scalar[1];
+    measureneuron1 = new scalar[1];
+    exponentneuron1 = new scalar[1];
     
     // ------------------------------------------------------------------------
     // custom update variables
@@ -193,8 +233,8 @@ void allocateMem() {
     // synapse variables
     // ------------------------------------------------------------------------
     
-    pushMergedNeuronInitGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
-    pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
+    pushMergedNeuronInitGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, measureneuron1, exponentneuron1, 1);
+    pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, measureneuron1, exponentneuron1, 1);
     pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(0, glbSpkCntneuron1);
 }
 
@@ -214,6 +254,8 @@ void freeMem() {
     delete[] inputneuron1;
     delete[] Vmemneuron1;
     delete[] scaleValneuron1;
+    delete[] measureneuron1;
+    delete[] exponentneuron1;
     
     // ------------------------------------------------------------------------
     // custom update variables
