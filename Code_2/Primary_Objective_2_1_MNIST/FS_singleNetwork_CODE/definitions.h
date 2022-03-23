@@ -59,6 +59,15 @@ EXPORT_VAR unsigned int* glbSpkneuron1;
 EXPORT_VAR scalar* inputneuron1;
 EXPORT_VAR scalar* Vmemneuron1;
 EXPORT_VAR scalar* scaleValneuron1;
+#define spikeCount_neuron2 glbSpkCntneuron2[0]
+#define spike_neuron2 glbSpkneuron2
+#define glbSpkShiftneuron2 0
+
+EXPORT_VAR unsigned int* glbSpkCntneuron2;
+EXPORT_VAR unsigned int* glbSpkneuron2;
+EXPORT_VAR scalar* inputneuron2;
+EXPORT_VAR scalar* Vmemneuron2;
+EXPORT_VAR scalar* scaleValneuron2;
 
 // ------------------------------------------------------------------------
 // custom update variables
@@ -99,6 +108,29 @@ EXPORT_FUNC void pullCurrentscaleValneuron1FromDevice();
 EXPORT_FUNC scalar* getCurrentscaleValneuron1(unsigned int batch = 0); 
 EXPORT_FUNC void pushneuron1StateToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void pullneuron1StateFromDevice();
+EXPORT_FUNC void pushneuron2SpikesToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullneuron2SpikesFromDevice();
+EXPORT_FUNC void pushneuron2CurrentSpikesToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullneuron2CurrentSpikesFromDevice();
+EXPORT_FUNC unsigned int* getneuron2CurrentSpikes(unsigned int batch = 0); 
+EXPORT_FUNC unsigned int& getneuron2CurrentSpikeCount(unsigned int batch = 0); 
+EXPORT_FUNC void pushinputneuron2ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullinputneuron2FromDevice();
+EXPORT_FUNC void pushCurrentinputneuron2ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullCurrentinputneuron2FromDevice();
+EXPORT_FUNC scalar* getCurrentinputneuron2(unsigned int batch = 0); 
+EXPORT_FUNC void pushVmemneuron2ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullVmemneuron2FromDevice();
+EXPORT_FUNC void pushCurrentVmemneuron2ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullCurrentVmemneuron2FromDevice();
+EXPORT_FUNC scalar* getCurrentVmemneuron2(unsigned int batch = 0); 
+EXPORT_FUNC void pushscaleValneuron2ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullscaleValneuron2FromDevice();
+EXPORT_FUNC void pushCurrentscaleValneuron2ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullCurrentscaleValneuron2FromDevice();
+EXPORT_FUNC scalar* getCurrentscaleValneuron2(unsigned int batch = 0); 
+EXPORT_FUNC void pushneuron2StateToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullneuron2StateFromDevice();
 // Runner functions
 EXPORT_FUNC void copyStateToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void copyConnectivityToDevice(bool uninitialisedOnly = false);

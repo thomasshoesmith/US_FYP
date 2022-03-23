@@ -10,7 +10,7 @@ struct MergedNeuronInitGroup0
     
 }
 ;
-static MergedNeuronInitGroup0 mergedNeuronInitGroup0[1];
+static MergedNeuronInitGroup0 mergedNeuronInitGroup0[2];
 void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, unsigned int numNeurons) {
     mergedNeuronInitGroup0[idx].spkCnt = spkCnt;
     mergedNeuronInitGroup0[idx].spk = spk;
@@ -27,7 +27,7 @@ void initialize() {
     // Local neuron groups
      {
         // merged neuron init group 0
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedNeuronInitGroup0[g]; 
             group->spkCnt[0] = 0;
             for (unsigned i = 0; i < (group->numNeurons); i++) {

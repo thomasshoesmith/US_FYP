@@ -68,9 +68,17 @@ ini = {"input": 17.0,  # input Value
        "scaleVal": 0.0}
 
 # Create first neuron layer
-neuron_layers = model.add_neuron_population("neuron1", 1,
+model.add_neuron_population("neuron1", 1,
                                              fs_relu_input_model, FS_PARAM, ini)
 
+model.add_neuron_population("neuron2", 1,
+                                             fs_relu_input_model, FS_PARAM, ini)
+
+model.add_synapse_population(
+    "synapse1", "DENSE_INDIVIDUALG", NO_DELAY,
+    neuron1, neuron2,
+    "StaticPulse", {}, {"g": w.flatten()}, {}, {},
+    "DeltaCurr", {}, {})
 
 model.build()
 model.load()
@@ -103,8 +111,8 @@ plt.title("FS Neuron")
 # Testing Playbox
 # ----------------------------------------------------------------------------
 
-print(s)
-print(v)
+#print(s)
+#print(v)
 
 def getSpikeTrain():
     z = []
@@ -123,4 +131,4 @@ def getSpikeTrain():
 print("fs conversion\n\n",ini.get("input"), "->", ''.join(getSpikeTrain()))
 
 
-plt.show()
+#plt.show()

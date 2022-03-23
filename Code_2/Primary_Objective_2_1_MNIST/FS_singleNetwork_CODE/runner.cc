@@ -28,6 +28,11 @@ unsigned int* glbSpkneuron1;
 scalar* inputneuron1;
 scalar* Vmemneuron1;
 scalar* scaleValneuron1;
+unsigned int* glbSpkCntneuron2;
+unsigned int* glbSpkneuron2;
+scalar* inputneuron2;
+scalar* Vmemneuron2;
+scalar* scaleValneuron2;
 
 // ------------------------------------------------------------------------
 // custom update variables
@@ -83,6 +88,36 @@ void pushneuron1StateToDevice(bool uninitialisedOnly) {
     pushscaleValneuron1ToDevice(uninitialisedOnly);
 }
 
+void pushneuron2SpikesToDevice(bool uninitialisedOnly) {
+}
+
+void pushneuron2CurrentSpikesToDevice(bool uninitialisedOnly) {
+}
+
+void pushinputneuron2ToDevice(bool uninitialisedOnly) {
+}
+
+void pushCurrentinputneuron2ToDevice(bool uninitialisedOnly) {
+}
+
+void pushVmemneuron2ToDevice(bool uninitialisedOnly) {
+}
+
+void pushCurrentVmemneuron2ToDevice(bool uninitialisedOnly) {
+}
+
+void pushscaleValneuron2ToDevice(bool uninitialisedOnly) {
+}
+
+void pushCurrentscaleValneuron2ToDevice(bool uninitialisedOnly) {
+}
+
+void pushneuron2StateToDevice(bool uninitialisedOnly) {
+    pushinputneuron2ToDevice(uninitialisedOnly);
+    pushVmemneuron2ToDevice(uninitialisedOnly);
+    pushscaleValneuron2ToDevice(uninitialisedOnly);
+}
+
 
 // ------------------------------------------------------------------------
 // copying things from device
@@ -117,6 +152,36 @@ void pullneuron1StateFromDevice() {
     pullscaleValneuron1FromDevice();
 }
 
+void pullneuron2SpikesFromDevice() {
+}
+
+void pullneuron2CurrentSpikesFromDevice() {
+}
+
+void pullinputneuron2FromDevice() {
+}
+
+void pullCurrentinputneuron2FromDevice() {
+}
+
+void pullVmemneuron2FromDevice() {
+}
+
+void pullCurrentVmemneuron2FromDevice() {
+}
+
+void pullscaleValneuron2FromDevice() {
+}
+
+void pullCurrentscaleValneuron2FromDevice() {
+}
+
+void pullneuron2StateFromDevice() {
+    pullinputneuron2FromDevice();
+    pullVmemneuron2FromDevice();
+    pullscaleValneuron2FromDevice();
+}
+
 
 // ------------------------------------------------------------------------
 // helper getter functions
@@ -141,9 +206,30 @@ scalar* getCurrentscaleValneuron1(unsigned int batch) {
     return scaleValneuron1;
 }
 
+unsigned int* getneuron2CurrentSpikes(unsigned int batch) {
+    return (glbSpkneuron2);
+}
+
+unsigned int& getneuron2CurrentSpikeCount(unsigned int batch) {
+    return glbSpkCntneuron2[0];
+}
+
+scalar* getCurrentinputneuron2(unsigned int batch) {
+    return inputneuron2;
+}
+
+scalar* getCurrentVmemneuron2(unsigned int batch) {
+    return Vmemneuron2;
+}
+
+scalar* getCurrentscaleValneuron2(unsigned int batch) {
+    return scaleValneuron2;
+}
+
 
 void copyStateToDevice(bool uninitialisedOnly) {
     pushneuron1StateToDevice(uninitialisedOnly);
+    pushneuron2StateToDevice(uninitialisedOnly);
 }
 
 void copyConnectivityToDevice(bool uninitialisedOnly) {
@@ -151,10 +237,12 @@ void copyConnectivityToDevice(bool uninitialisedOnly) {
 
 void copyStateFromDevice() {
     pullneuron1StateFromDevice();
+    pullneuron2StateFromDevice();
 }
 
 void copyCurrentSpikesFromDevice() {
     pullneuron1CurrentSpikesFromDevice();
+    pullneuron2CurrentSpikesFromDevice();
 }
 
 void copyCurrentSpikeEventsFromDevice() {
@@ -176,6 +264,11 @@ void allocateMem() {
     inputneuron1 = new scalar[1];
     Vmemneuron1 = new scalar[1];
     scaleValneuron1 = new scalar[1];
+    glbSpkCntneuron2 = new unsigned int[1];
+    glbSpkneuron2 = new unsigned int[1];
+    inputneuron2 = new scalar[1];
+    Vmemneuron2 = new scalar[1];
+    scaleValneuron2 = new scalar[1];
     
     // ------------------------------------------------------------------------
     // custom update variables
@@ -194,8 +287,11 @@ void allocateMem() {
     // ------------------------------------------------------------------------
     
     pushMergedNeuronInitGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
+    pushMergedNeuronInitGroup0ToDevice(1, glbSpkCntneuron2, glbSpkneuron2, inputneuron2, Vmemneuron2, scaleValneuron2, 1);
     pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
+    pushMergedNeuronUpdateGroup0ToDevice(1, glbSpkCntneuron2, glbSpkneuron2, inputneuron2, Vmemneuron2, scaleValneuron2, 1);
     pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(0, glbSpkCntneuron1);
+    pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(1, glbSpkCntneuron2);
 }
 
 void freeMem() {
@@ -214,6 +310,11 @@ void freeMem() {
     delete[] inputneuron1;
     delete[] Vmemneuron1;
     delete[] scaleValneuron1;
+    delete[] glbSpkCntneuron2;
+    delete[] glbSpkneuron2;
+    delete[] inputneuron2;
+    delete[] Vmemneuron2;
+    delete[] scaleValneuron2;
     
     // ------------------------------------------------------------------------
     // custom update variables

@@ -10,6 +10,7 @@ struct MergedNeuronUpdateGroup0
     scalar* scaleVal;
     scalar* measure;
     scalar* exponent;
+    scalar* hT;
     unsigned int numNeurons;
     
 }
@@ -21,7 +22,7 @@ struct MergedNeuronSpikeQueueUpdateGroup0
 }
 ;
 static MergedNeuronUpdateGroup0 mergedNeuronUpdateGroup0[1];
-void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, unsigned int numNeurons) {
+void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, scalar* hT, unsigned int numNeurons) {
     mergedNeuronUpdateGroup0[idx].spkCnt = spkCnt;
     mergedNeuronUpdateGroup0[idx].spk = spk;
     mergedNeuronUpdateGroup0[idx].input = input;
@@ -29,6 +30,7 @@ void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt
     mergedNeuronUpdateGroup0[idx].scaleVal = scaleVal;
     mergedNeuronUpdateGroup0[idx].measure = measure;
     mergedNeuronUpdateGroup0[idx].exponent = exponent;
+    mergedNeuronUpdateGroup0[idx].hT = hT;
     mergedNeuronUpdateGroup0[idx].numNeurons = numNeurons;
 }
 static MergedNeuronSpikeQueueUpdateGroup0 mergedNeuronSpikeQueueUpdateGroup0[1];
@@ -60,6 +62,7 @@ void updateNeurons(float t) {
                 scalar lscaleVal = group->scaleVal[i];
                 scalar lmeasure = group->measure[i];
                 scalar lexponent = group->exponent[i];
+                scalar lhT = group->hT[i];
                 
                 // test whether spike condition was fulfilled previously
                 // calculate membrane potential
@@ -68,7 +71,7 @@ void updateNeurons(float t) {
                 const int kInt = (int)(8.00000000000000000e+00f);
                 
                 // Convert Alpha to integer
-                const int AlphaInt = (int)(1.00000000000000000e+01f);
+                const int AlphaInt = (int)(2.00000000000000000e+01f);
                 
                 // Convert elim to integer
                 const int elimInt = (int)(4.00000000000000000e+00f);
@@ -80,52 +83,63 @@ void updateNeurons(float t) {
                 
                 // If this is the first timestep, apply input
                 if(pipeTimestep == 0) {
-                    lscaleVal = AlphaInt * pow(2, - fmin(pow(2, elimInt - 1), fmax(0, ceil(log2(1 / (lVmem / AlphaInt))))));
+                
+                    lscaleVal = AlphaInt * pow(2, - fmin(pow(2, elimInt - 1), fmax(0, ceil(log2(1 / (linput / AlphaInt))))));
+                    //printf("%.6f", lscaleVal);
                 
                     // needs to be cleaned up
                     // scaleVal can be derived from exponent
                     //# TODO: update variable names to logial ones
-                    //lexponent = fmin(pow(2, elimInt - 1), fmax(0, ceil(log2(1 / (lVmem / AlphaInt)))));
-                    //printf("%.1f", lexponent);
+                    lexponent = fmin(pow(2, elimInt - 1), fmax(0, ceil(log2(1 / (linput / AlphaInt)))));
+                    printf(" Exponent:%.6f ", lexponent);
+                    //printf(" ScaleVal:%.6f ", lscaleVal);
                 
+                    lVmem = lexponent;
+                    lmeasure = lexponent;
                 
                 }
                 
-                if(pipeTimestep == elimInt) {
+                if (pipeTimestep == elimInt) {
                     lVmem = linput;
+                    //printf("Value: %d", pipeTimestep);
                 }
                 
-                
-                const scalar hT = 0;
+                lhT = 0;
                 
                 lmeasure = 0;
                 
+                if (pipeTimestep >= elimInt) {
                 
-                if(pipeTimestep > elimInt) {
-                    const scalar hT = lscaleVal;
+                    lhT = lscaleVal / (1 << (pipeTimestep - 4));
                 
-                    lmeasure = lscaleVal;
+                    lmeasure = lscaleVal / (1 << (pipeTimestep - 4));
+                
+                    //printf(" Value:%d ", pipeTimestep);
                 } else {
-                    const scalar hT = 0;
                 
-                    lmeasure = 0;
+                    lhT = pow(2, elimInt-1) / (1 << pipeTimestep);
+                
+                    lmeasure = pow(2, elimInt-1) / (1 << pipeTimestep);
+                
                 }
+                //printf(" pTs:%dhT:%.6f ", pipeTimestep, lhT);
                 
                 
                 // test for and register a true spike
                 if (
-                lVmem >= hT
+                lVmem >= lhT
                 ) {
                     group->spk[group->spkCnt[0]++] = i;
                     // spike reset code
                     
-                    lVmem -= hT;
+                    lVmem -= lhT;
                     
                 }
                 group->Vmem[i] = lVmem;
                 group->scaleVal[i] = lscaleVal;
                 group->measure[i] = lmeasure;
                 group->exponent[i] = lexponent;
+                group->hT[i] = lhT;
             }
         }
     }

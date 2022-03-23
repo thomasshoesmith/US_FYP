@@ -49,7 +49,7 @@ from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 # ----------------------------------------------------------------------------
 
 FP_PARAM =  {"K":       8.0,      # K timestep length
-             "alpha":   10.0,     # alpha "max" Value
+             "alpha":   20.0,     # alpha "max" Value
              "elim":    4.0}      # elim number of bits to represent the exponent
 
 TIMESTEP = 1.0
@@ -64,11 +64,12 @@ INPUT_CURRENT_SCALE = 1.0 / 100.0
 fp_relu_input_model = create_custom_neuron_class(
     'fp_relu_input',
     param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
-    var_name_types=[('input', 'scalar', VarAccess_READ_ONLY_DUPLICATE),
-                    ('Vmem', 'scalar'),
-                    ('scaleVal', 'scalar'),
+    var_name_types=[('input',   'scalar', VarAccess_READ_ONLY_DUPLICATE),
+                    ('Vmem',    'scalar'),
+                    ('scaleVal','scalar'),
                     ('measure', 'scalar'),
-                    ('exponent', 'scalar')],
+                    ('exponent','scalar'),
+                    ('hT',      'scalar')],
     sim_code='''
     // Convert K to integer
     const int kInt = (int)$(K);
@@ -86,43 +87,53 @@ fp_relu_input_model = create_custom_neuron_class(
 
     // If this is the first timestep, apply input
     if(pipeTimestep == 0) {
-        $(scaleVal) = AlphaInt * pow(2, - fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(Vmem) / AlphaInt))))));
+
+        $(scaleVal) = AlphaInt * pow(2, - fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(input) / AlphaInt))))));
+        //printf("%.6f", $(scaleVal));
 
         // needs to be cleaned up
         // scaleVal can be derived from exponent
         //# TODO: update variable names to logial ones
-        //$(exponent) = fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(Vmem) / AlphaInt)))));
-        //printf("%.1f", $(exponent));
+        $(exponent) = fmin(pow(2, elimInt - 1), fmaxf(0, ceil(log2(1 / ($(input) / AlphaInt)))));
+        printf(" Exponent:%.6f ", $(exponent));
+        //printf(" ScaleVal:%.6f ", $(scaleVal));
 
+        $(Vmem) = $(exponent);
+        $(measure) = $(exponent);
 
     }
 
-    if(pipeTimestep == elimInt) {
+    if (pipeTimestep == elimInt) {
         $(Vmem) = $(input);
+        //printf("Value: %d", pipeTimestep);
     }
 
-
-    const scalar hT = 0;
+    $(hT) = 0;
 
     $(measure) = 0;
 
+    if (pipeTimestep >= elimInt) {
 
-    if(pipeTimestep > elimInt) {
-        const scalar hT = $(scaleVal) / (1 << (pipeTimestep - elimInt + 1));
+        $(hT) = $(scaleVal) / (1 << (pipeTimestep - 4));
 
-        $(measure) = $(scaleVal) / (1 << (pipeTimestep - elimInt + 1));
+        $(measure) = $(scaleVal) / (1 << (pipeTimestep - 4));
+
+        //printf(" Value:%d ", pipeTimestep);
     } else {
-        const scalar hT = 0;
 
-        $(measure) = 0;
+        $(hT) = pow(2, elimInt-1) / (1 << pipeTimestep);
+
+        $(measure) = pow(2, elimInt-1) / (1 << pipeTimestep);
+
     }
+    //printf(" pTs:%dhT:%.6f ", pipeTimestep, $(hT));
 
     ''',
     threshold_condition_code='''
-    $(Vmem) >= hT
+    $(Vmem) >= $(hT)
     ''',
     reset_code='''
-    $(Vmem) -= hT;
+    $(Vmem) -= $(hT);
     ''',
     is_auto_refractory_required=False)
 
@@ -135,11 +146,12 @@ model = GeNNModel("float", "FP_singleNetwork")
 model.dT = TIMESTEP
 
 # Initial values to initialise all neurons to
-ini = {"input": 17.0,  # input Value
+ini = {"input": 4.0,  # input Value
        "Vmem": 0.0,   # voltage membrane value
        "scaleVal": 0.0,
        "measure": 0.0,  #testing
-       "exponent": 0.0}
+       "exponent": 0.0,
+       "hT": 0.0}
 
 # Create first neuron layer
 neuron_layers = model.add_neuron_population("neuron1", 1,
@@ -168,9 +180,12 @@ while model.t < 8.0:
 
 fig, axis = plt.subplots()
 axis.plot(v)
+axis.plot(s)
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FP Neuron")
+plt.axvline(x=FP_PARAM.get("elim"), color='r', linestyle='dotted')
+plt.axhline(y=0, color='r', linestyle='dotted')
 plt.show()
 
 
@@ -179,6 +194,7 @@ plt.show()
 # Testing Playbox
 # ----------------------------------------------------------------------------
 
+print("\n")
 print(s)
 print(v)
 

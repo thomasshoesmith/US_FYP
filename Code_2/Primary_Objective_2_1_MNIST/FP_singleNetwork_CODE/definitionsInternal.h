@@ -53,7 +53,7 @@ extern "C" {
 // ------------------------------------------------------------------------
 // copying merged group structures to device
 // ------------------------------------------------------------------------
-EXPORT_FUNC void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, unsigned int numNeurons);
-EXPORT_FUNC void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, unsigned int numNeurons);
+EXPORT_FUNC void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, scalar* hT, unsigned int numNeurons);
+EXPORT_FUNC void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, scalar* hT, unsigned int numNeurons);
 EXPORT_FUNC void pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt);
 }  // extern "C"

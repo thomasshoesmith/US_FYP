@@ -18,7 +18,7 @@ struct MergedNeuronSpikeQueueUpdateGroup0
     
 }
 ;
-static MergedNeuronUpdateGroup0 mergedNeuronUpdateGroup0[1];
+static MergedNeuronUpdateGroup0 mergedNeuronUpdateGroup0[2];
 void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, unsigned int numNeurons) {
     mergedNeuronUpdateGroup0[idx].spkCnt = spkCnt;
     mergedNeuronUpdateGroup0[idx].spk = spk;
@@ -27,7 +27,7 @@ void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt
     mergedNeuronUpdateGroup0[idx].scaleVal = scaleVal;
     mergedNeuronUpdateGroup0[idx].numNeurons = numNeurons;
 }
-static MergedNeuronSpikeQueueUpdateGroup0 mergedNeuronSpikeQueueUpdateGroup0[1];
+static MergedNeuronSpikeQueueUpdateGroup0 mergedNeuronSpikeQueueUpdateGroup0[2];
 void pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt) {
     mergedNeuronSpikeQueueUpdateGroup0[idx].spkCnt = spkCnt;
 }
@@ -40,14 +40,14 @@ void pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(unsigned int idx, unsigned i
 void updateNeurons(float t) {
      {
         // merged neuron spike queue update group 0
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedNeuronSpikeQueueUpdateGroup0[g]; 
             group->spkCnt[0] = 0;
         }
     }
      {
         // merged neuron update group 0
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedNeuronUpdateGroup0[g]; 
             
             for(unsigned int i = 0; i < group->numNeurons; i++) {

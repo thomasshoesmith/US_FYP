@@ -61,6 +61,7 @@ EXPORT_VAR scalar* Vmemneuron1;
 EXPORT_VAR scalar* scaleValneuron1;
 EXPORT_VAR scalar* measureneuron1;
 EXPORT_VAR scalar* exponentneuron1;
+EXPORT_VAR scalar* hTneuron1;
 
 // ------------------------------------------------------------------------
 // custom update variables
@@ -109,6 +110,11 @@ EXPORT_FUNC void pullexponentneuron1FromDevice();
 EXPORT_FUNC void pushCurrentexponentneuron1ToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void pullCurrentexponentneuron1FromDevice();
 EXPORT_FUNC scalar* getCurrentexponentneuron1(unsigned int batch = 0); 
+EXPORT_FUNC void pushhTneuron1ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullhTneuron1FromDevice();
+EXPORT_FUNC void pushCurrenthTneuron1ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullCurrenthTneuron1FromDevice();
+EXPORT_FUNC scalar* getCurrenthTneuron1(unsigned int batch = 0); 
 EXPORT_FUNC void pushneuron1StateToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void pullneuron1StateFromDevice();
 // Runner functions

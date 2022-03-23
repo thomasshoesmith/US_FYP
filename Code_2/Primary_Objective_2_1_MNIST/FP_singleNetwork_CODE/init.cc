@@ -8,12 +8,13 @@ struct MergedNeuronInitGroup0
     scalar* scaleVal;
     scalar* measure;
     scalar* exponent;
+    scalar* hT;
     unsigned int numNeurons;
     
 }
 ;
 static MergedNeuronInitGroup0 mergedNeuronInitGroup0[1];
-void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, unsigned int numNeurons) {
+void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, scalar* measure, scalar* exponent, scalar* hT, unsigned int numNeurons) {
     mergedNeuronInitGroup0[idx].spkCnt = spkCnt;
     mergedNeuronInitGroup0[idx].spk = spk;
     mergedNeuronInitGroup0[idx].input = input;
@@ -21,6 +22,7 @@ void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, 
     mergedNeuronInitGroup0[idx].scaleVal = scaleVal;
     mergedNeuronInitGroup0[idx].measure = measure;
     mergedNeuronInitGroup0[idx].exponent = exponent;
+    mergedNeuronInitGroup0[idx].hT = hT;
     mergedNeuronInitGroup0[idx].numNeurons = numNeurons;
 }
 // ------------------------------------------------------------------------
@@ -40,7 +42,7 @@ void initialize() {
              {
                 for (unsigned i = 0; i < (group->numNeurons); i++) {
                     scalar initVal;
-                    initVal = (1.70000000000000000e+01f);
+                    initVal = (4.00000000000000000e+00f);
                     group->input[i] = initVal;
                 }
             }
@@ -70,6 +72,13 @@ void initialize() {
                     scalar initVal;
                     initVal = (0.00000000000000000e+00f);
                     group->exponent[i] = initVal;
+                }
+            }
+             {
+                for (unsigned i = 0; i < (group->numNeurons); i++) {
+                    scalar initVal;
+                    initVal = (0.00000000000000000e+00f);
+                    group->hT[i] = initVal;
                 }
             }
             // current source variables
