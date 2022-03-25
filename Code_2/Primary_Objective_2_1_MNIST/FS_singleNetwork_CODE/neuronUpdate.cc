@@ -8,7 +8,6 @@ struct MergedNeuronUpdateGroup0
     scalar* input;
     scalar* Vmem;
     scalar* scaleVal;
-    float* inSynInSyn0;
     unsigned int numNeurons;
     
 }
@@ -19,6 +18,7 @@ struct MergedNeuronUpdateGroup1
     unsigned int* spk;
     scalar* Fx;
     scalar* Vmem;
+    float* inSynInSyn0;
     unsigned int numNeurons;
     
 }
@@ -36,21 +36,21 @@ struct MergedNeuronSpikeQueueUpdateGroup1
 }
 ;
 static MergedNeuronUpdateGroup0 mergedNeuronUpdateGroup0[1];
-void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, float* inSynInSyn0, unsigned int numNeurons) {
+void pushMergedNeuronUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* input, scalar* Vmem, scalar* scaleVal, unsigned int numNeurons) {
     mergedNeuronUpdateGroup0[idx].spkCnt = spkCnt;
     mergedNeuronUpdateGroup0[idx].spk = spk;
     mergedNeuronUpdateGroup0[idx].input = input;
     mergedNeuronUpdateGroup0[idx].Vmem = Vmem;
     mergedNeuronUpdateGroup0[idx].scaleVal = scaleVal;
-    mergedNeuronUpdateGroup0[idx].inSynInSyn0 = inSynInSyn0;
     mergedNeuronUpdateGroup0[idx].numNeurons = numNeurons;
 }
 static MergedNeuronUpdateGroup1 mergedNeuronUpdateGroup1[1];
-void pushMergedNeuronUpdateGroup1ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* Fx, scalar* Vmem, unsigned int numNeurons) {
+void pushMergedNeuronUpdateGroup1ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
     mergedNeuronUpdateGroup1[idx].spkCnt = spkCnt;
     mergedNeuronUpdateGroup1[idx].spk = spk;
     mergedNeuronUpdateGroup1[idx].Fx = Fx;
     mergedNeuronUpdateGroup1[idx].Vmem = Vmem;
+    mergedNeuronUpdateGroup1[idx].inSynInSyn0 = inSynInSyn0;
     mergedNeuronUpdateGroup1[idx].numNeurons = numNeurons;
 }
 static MergedNeuronSpikeQueueUpdateGroup0 mergedNeuronSpikeQueueUpdateGroup0[1];
@@ -92,14 +92,6 @@ void updateNeurons(float t) {
                 scalar lVmem = group->Vmem[i];
                 scalar lscaleVal = group->scaleVal[i];
                 
-                float Isyn = 0;
-                 {
-                    // pull inSyn values in a coalesced access
-                    float linSyn = group->inSynInSyn0[i];
-                    Isyn += linSyn; linSyn = 0;
-                    
-                    group->inSynInSyn0[i] = linSyn;
-                }
                 // test whether spike condition was fulfilled previously
                 // calculate membrane potential
                 
@@ -143,6 +135,13 @@ void updateNeurons(float t) {
                 scalar lVmem = group->Vmem[i];
                 
                 float Isyn = 0;
+                 {
+                    // pull inSyn values in a coalesced access
+                    float linSyn = group->inSynInSyn0[i];
+                    Isyn += linSyn; linSyn = 0;
+                    
+                    group->inSynInSyn0[i] = linSyn;
+                }
                 // test whether spike condition was fulfilled previously
                 // calculate membrane potential
                 

@@ -59,8 +59,8 @@ INPUT_CURRENT_SCALE = 1.0 / 100.0
 # ----------------------------------------------------------------------------
 # Custom GeNN models
 # ----------------------------------------------------------------------------
-#derived_params=[("mantissa_scale", create_dpf_class(lambda pars, dt: pars[1] * 2** - min((2**pars[2] - 1), max(0, math.ceil(math.log2(1 /(pars[3] / pars[1])))))) ())],
 
+## TODO: clean up var_name_types, many used for testing
 fp_relu_input_model = create_custom_neuron_class(
     'fp_relu_input',
     param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
@@ -163,6 +163,8 @@ model.load()
 
 v = np.empty((8, 1))
 v_view = neuron_layers.vars["Vmem"].view
+
+print(v_view)
 
 #duplicate
 s = np.empty((8, 1))

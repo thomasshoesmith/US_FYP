@@ -45,11 +45,13 @@ float* inSynsynapse1;
 // ------------------------------------------------------------------------
 // synapse connectivity
 // ------------------------------------------------------------------------
+const unsigned int maxRowLengthsynapse1 = 1;
+unsigned int* rowLengthsynapse1;
+uint32_t* indsynapse1;
 
 // ------------------------------------------------------------------------
 // synapse variables
 // ------------------------------------------------------------------------
-scalar* gsynapse1;
 
 }  // extern "C"
 // ------------------------------------------------------------------------
@@ -112,14 +114,13 @@ void pushneuron2StateToDevice(bool uninitialisedOnly) {
     pushVmemneuron2ToDevice(uninitialisedOnly);
 }
 
-void pushgsynapse1ToDevice(bool uninitialisedOnly) {
+void pushsynapse1ConnectivityToDevice(bool uninitialisedOnly) {
 }
 
 void pushinSynsynapse1ToDevice(bool uninitialisedOnly) {
 }
 
 void pushsynapse1StateToDevice(bool uninitialisedOnly) {
-    pushgsynapse1ToDevice(uninitialisedOnly);
     pushinSynsynapse1ToDevice(uninitialisedOnly);
 }
 
@@ -180,14 +181,13 @@ void pullneuron2StateFromDevice() {
     pullVmemneuron2FromDevice();
 }
 
-void pullgsynapse1FromDevice() {
+void pullsynapse1ConnectivityFromDevice() {
 }
 
 void pullinSynsynapse1FromDevice() {
 }
 
 void pullsynapse1StateFromDevice() {
-    pullgsynapse1FromDevice();
     pullinSynsynapse1FromDevice();
 }
 
@@ -239,6 +239,7 @@ void copyStateToDevice(bool uninitialisedOnly) {
 }
 
 void copyConnectivityToDevice(bool uninitialisedOnly) {
+    pushsynapse1ConnectivityToDevice(uninitialisedOnly);
 }
 
 void copyStateFromDevice() {
@@ -267,14 +268,14 @@ void allocateMem() {
     // local neuron groups
     // ------------------------------------------------------------------------
     glbSpkCntneuron1 = new unsigned int[1];
-    glbSpkneuron1 = new unsigned int[2];
-    inputneuron1 = new scalar[2];
-    Vmemneuron1 = new scalar[2];
-    scaleValneuron1 = new scalar[2];
+    glbSpkneuron1 = new unsigned int[1];
+    inputneuron1 = new scalar[1];
+    Vmemneuron1 = new scalar[1];
+    scaleValneuron1 = new scalar[1];
     glbSpkCntneuron2 = new unsigned int[1];
-    glbSpkneuron2 = new unsigned int[2];
-    Fxneuron2 = new scalar[2];
-    Vmemneuron2 = new scalar[2];
+    glbSpkneuron2 = new unsigned int[1];
+    Fxneuron2 = new scalar[1];
+    Vmemneuron2 = new scalar[1];
     
     // ------------------------------------------------------------------------
     // custom update variables
@@ -283,23 +284,23 @@ void allocateMem() {
     // ------------------------------------------------------------------------
     // pre and postsynaptic variables
     // ------------------------------------------------------------------------
-    inSynsynapse1 = new float[2];
+    inSynsynapse1 = new float[1];
     
     // ------------------------------------------------------------------------
     // synapse connectivity
     // ------------------------------------------------------------------------
+    rowLengthsynapse1 = new unsigned int[1];
+    indsynapse1 = new uint32_t[1];
     
     // ------------------------------------------------------------------------
     // synapse variables
     // ------------------------------------------------------------------------
-    gsynapse1 = new scalar[4];
     
-    pushMergedNeuronInitGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, inSynsynapse1, 2);
-    pushMergedNeuronInitGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, 2);
-    pushMergedSynapseDenseInitGroup0ToDevice(0, gsynapse1, 2, 2, 2);
-    pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, inSynsynapse1, 2);
-    pushMergedNeuronUpdateGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, 2);
-    pushMergedPresynapticUpdateGroup0ToDevice(0, inSynsynapse1, glbSpkCntneuron1, glbSpkneuron1, gsynapse1, 2, 2, 2);
+    pushMergedNeuronInitGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
+    pushMergedNeuronInitGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
+    pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
+    pushMergedNeuronUpdateGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
+    pushMergedPresynapticUpdateGroup0ToDevice(0, inSynsynapse1, glbSpkCntneuron1, glbSpkneuron1, rowLengthsynapse1, indsynapse1, 1, 1, 1);
     pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(0, glbSpkCntneuron1);
     pushMergedNeuronSpikeQueueUpdateGroup1ToDevice(0, glbSpkCntneuron2);
 }
@@ -337,11 +338,12 @@ void freeMem() {
     // ------------------------------------------------------------------------
     // synapse connectivity
     // ------------------------------------------------------------------------
+    delete[] rowLengthsynapse1;
+    delete[] indsynapse1;
     
     // ------------------------------------------------------------------------
     // synapse variables
     // ------------------------------------------------------------------------
-    delete[] gsynapse1;
     
 }
 
