@@ -136,7 +136,7 @@ pop2 = model.add_neuron_population("neuron2", 1, fs_model, FS_PARAM, ini)
 # Parameters for synapse
 # ----------------------------------------------------------------------------
 
-s_ini = {"g": 0.0}
+s_ini = {"g": -8.0}
 
 ps_p = {"tau": 0.0, # Decay time constant [ms]
         "E": 0.0} # Reversal potential [mV]
@@ -165,10 +165,10 @@ model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY
 model.build()
 model.load()
 
-p1 = np.empty((8, 1))
+p1 = np.empty((200, 1))
 p1_view = pop1.vars["Vmem"].view
 
-p2 = np.empty((8, 1))
+p2 = np.empty((200, 1))
 p2_view = pop2.vars["Vmem"].view
 
 """#duplicate
@@ -178,7 +178,7 @@ s_view = pop1.vars["scaleVal"].view"""
 print(p1_view.shape)
 
 
-while model.t < 8.0:
+while model.t < 200.0:
     model.step_time()
 
     pop1.pull_var_from_device("Vmem")

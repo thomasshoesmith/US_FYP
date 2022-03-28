@@ -80,13 +80,11 @@ EXPORT_VAR float* inSynsynapse1;
 // ------------------------------------------------------------------------
 // synapse connectivity
 // ------------------------------------------------------------------------
-EXPORT_VAR const unsigned int maxRowLengthsynapse1;
-EXPORT_VAR unsigned int* rowLengthsynapse1;
-EXPORT_VAR uint32_t* indsynapse1;
 
 // ------------------------------------------------------------------------
 // synapse variables
 // ------------------------------------------------------------------------
+EXPORT_VAR scalar* gsynapse1;
 
 EXPORT_FUNC void pushneuron1SpikesToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void pullneuron1SpikesFromDevice();
@@ -129,8 +127,8 @@ EXPORT_FUNC void pullCurrentVmemneuron2FromDevice();
 EXPORT_FUNC scalar* getCurrentVmemneuron2(unsigned int batch = 0); 
 EXPORT_FUNC void pushneuron2StateToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void pullneuron2StateFromDevice();
-EXPORT_FUNC void pushsynapse1ConnectivityToDevice(bool uninitialisedOnly = false);
-EXPORT_FUNC void pullsynapse1ConnectivityFromDevice();
+EXPORT_FUNC void pushgsynapse1ToDevice(bool uninitialisedOnly = false);
+EXPORT_FUNC void pullgsynapse1FromDevice();
 EXPORT_FUNC void pushinSynsynapse1ToDevice(bool uninitialisedOnly = false);
 EXPORT_FUNC void pullinSynsynapse1FromDevice();
 EXPORT_FUNC void pushsynapse1StateToDevice(bool uninitialisedOnly = false);
