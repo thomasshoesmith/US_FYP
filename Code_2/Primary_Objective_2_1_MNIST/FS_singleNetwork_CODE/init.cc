@@ -39,7 +39,7 @@ void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, 
     mergedNeuronInitGroup0[idx].scaleVal = scaleVal;
     mergedNeuronInitGroup0[idx].numNeurons = numNeurons;
 }
-static MergedNeuronInitGroup1 mergedNeuronInitGroup1[1];
+static MergedNeuronInitGroup1 mergedNeuronInitGroup1[2];
 void pushMergedNeuronInitGroup1ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
     mergedNeuronInitGroup1[idx].spkCnt = spkCnt;
     mergedNeuronInitGroup1[idx].spk = spk;
@@ -48,7 +48,7 @@ void pushMergedNeuronInitGroup1ToDevice(unsigned int idx, unsigned int* spkCnt, 
     mergedNeuronInitGroup1[idx].inSynInSyn0 = inSynInSyn0;
     mergedNeuronInitGroup1[idx].numNeurons = numNeurons;
 }
-static MergedSynapseDenseInitGroup0 mergedSynapseDenseInitGroup0[1];
+static MergedSynapseDenseInitGroup0 mergedSynapseDenseInitGroup0[2];
 void pushMergedSynapseDenseInitGroup0ToDevice(unsigned int idx, scalar* g, unsigned int rowStride, unsigned int numSrcNeurons, unsigned int numTrgNeurons) {
     mergedSynapseDenseInitGroup0[idx].g = g;
     mergedSynapseDenseInitGroup0[idx].rowStride = rowStride;
@@ -98,7 +98,7 @@ void initialize() {
     }
      {
         // merged neuron init group 1
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedNeuronInitGroup1[g]; 
             group->spkCnt[0] = 0;
             for (unsigned i = 0; i < (group->numNeurons); i++) {
@@ -134,7 +134,7 @@ void initialize() {
     // Synapse groups with dense connectivity
      {
         // merged synapse dense init group 0
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedSynapseDenseInitGroup0[g]; 
             for(unsigned int i = 0; i < group->numSrcNeurons; i++) {
                  {

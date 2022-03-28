@@ -133,6 +133,8 @@ pop1 = model.add_neuron_population("neuron1", 1, fs_input_model, FS_INPUT_PARAM,
 
 pop2 = model.add_neuron_population("neuron2", 1, fs_model, FS_PARAM, ini)
 
+pop3 = model.add_neuron_population("neuron3", 1, fs_model, FS_PARAM, ini)
+
 # ----------------------------------------------------------------------------
 # Parameters for synapse
 # ----------------------------------------------------------------------------
@@ -145,6 +147,13 @@ ps_p = {"tau": 0.0, # Decay time constant [ms]
 model.add_synapse_population(
     "synapse1", "DENSE_INDIVIDUALG", NO_DELAY,
     pop1, pop2,
+    "StaticPulse", {}, s_ini, {}, {},
+    "DeltaCurr", {}, {})
+
+
+model.add_synapse_population(
+    "synapse2", "DENSE_INDIVIDUALG", NO_DELAY,
+    pop2, pop3,
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
 
@@ -164,12 +173,15 @@ model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY
 model.build()
 model.load()
 
-p1 = np.empty((8, 1))
+p1 = np.empty((20, 1))
 p1_view = pop1.vars["Vmem"].view
-p1_spike = pop1.current_spikes
+p1_spike = pop2.current_spikes
 
-p2 = np.empty((8, 1))
+p2 = np.empty((20, 1))
 p2_view = pop2.vars["Fx"].view
+
+p3 = np.empty((20, 1))
+p3_view = pop3.vars["Fx"].view
 
 print(p2_view)
 
@@ -180,25 +192,25 @@ s_view = pop1.vars["scaleVal"].view"""
 print(p1_view.shape)
 
 
-while model.t < 8.0:
+while model.t < 20.0:
     model.step_time()
 
     pop1.pull_var_from_device("Vmem")
     pop1.pull_current_spikes_from_device()
     p1[model.timestep - 1,:]=p1_view[0]
-    #print(p1[model.timestep - 1, :])
+    print(p1_spike)
 
     pop2.pull_var_from_device("Fx")
     p2[model.timestep - 1,:]=p2_view[0]
 
-"""    pop1.pull_var_from_device("scaleVal")
-
-    s[model.timestep - 1,:]=s_view[1]"""
+    pop3.pull_var_from_device("Fx")
+    p3[model.timestep - 1,:]=p3_view[0]
 
 
 fig, axis = plt.subplots()
 axis.plot(p1, label="population 1")
 axis.plot(p2, label="population 2")
+axis.plot(p3, label="population 3")
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FS Neuron")

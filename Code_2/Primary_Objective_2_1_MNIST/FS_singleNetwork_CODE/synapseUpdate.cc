@@ -13,7 +13,7 @@ struct MergedPresynapticUpdateGroup0
     
 }
 ;
-static MergedPresynapticUpdateGroup0 mergedPresynapticUpdateGroup0[1];
+static MergedPresynapticUpdateGroup0 mergedPresynapticUpdateGroup0[2];
 void pushMergedPresynapticUpdateGroup0ToDevice(unsigned int idx, float* inSyn, unsigned int* srcSpkCnt, unsigned int* srcSpk, scalar* g, unsigned int rowStride, unsigned int numSrcNeurons, unsigned int numTrgNeurons) {
     mergedPresynapticUpdateGroup0[idx].inSyn = inSyn;
     mergedPresynapticUpdateGroup0[idx].srcSpkCnt = srcSpkCnt;
@@ -29,7 +29,7 @@ void pushMergedPresynapticUpdateGroup0ToDevice(unsigned int idx, float* inSyn, u
 void updateSynapses(float t) {
      {
         // merged presynaptic update group 0
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedPresynapticUpdateGroup0[g]; 
             // process presynaptic events: True Spikes
             for (unsigned int i = 0; i < group->srcSpkCnt[0]; i++) {
