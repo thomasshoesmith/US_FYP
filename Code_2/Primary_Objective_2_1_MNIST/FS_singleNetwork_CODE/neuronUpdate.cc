@@ -98,7 +98,7 @@ void updateNeurons(float t) {
                 // Convert K to integer
                 const int kInt = (int)(8.00000000000000000e+00f);
                 
-                // Get timestep within presentation
+                // Get timestep within presentation | mod to keep within range
                 const int pipeTimestep = (int)(t / DT);
                 
                 // If this is the first timestep, apply input
@@ -106,9 +106,10 @@ void updateNeurons(float t) {
                     lVmem = linput;
                 }
                 
-                const scalar hT = (7.81250000000000000e-02f) * (1 << (kInt - (pipeTimestep+1)));
+                // check pipetimestep < 8
+                const scalar hT = (7.81250000000000000e-02f) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
                 
-                lscaleVal = (7.81250000000000000e-02f) * (1 << (kInt - (pipeTimestep+1)));
+                lscaleVal = (7.81250000000000000e-02f) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
                 
                 // test for and register a true spike
                 if (

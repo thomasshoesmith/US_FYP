@@ -39,7 +39,7 @@ fs_input_model = create_custom_neuron_class(
     // Convert K to integer
     const int kInt = (int)$(K);
 
-    // Get timestep within presentation
+    // Get timestep within presentation | mod to keep within range
     const int pipeTimestep = (int)($(t) / DT);
 
     // If this is the first timestep, apply input
@@ -47,9 +47,10 @@ fs_input_model = create_custom_neuron_class(
         $(Vmem) = $(input);
     }
 
-    const scalar hT = $(scale) * (1 << (kInt - (pipeTimestep+1)));
+    // check pipetimestep < 8
+    const scalar hT = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
 
-    $(scaleVal) = $(scale) * (1 << (kInt - (pipeTimestep+1)));
+    $(scaleVal) = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -136,7 +137,7 @@ pop2 = model.add_neuron_population("neuron2", 1, fs_model, FS_PARAM, ini)
 # Parameters for synapse
 # ----------------------------------------------------------------------------
 
-s_ini = {"g": -8.0}
+s_ini = {"g": 1.0} #weight
 
 ps_p = {"tau": 0.0, # Decay time constant [ms]
         "E": 0.0} # Reversal potential [mV]
@@ -147,15 +148,13 @@ model.add_synapse_population(
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
 
-
 """
 // Notes on adding a synapse pop
 model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
     pop1, pop1, <= connections
-    "StaticPulse" (predefined update model, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
+    "StaticPulse" (predefined *update model*, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
     "ExpCond" ("DeltaCurr"!, should work), ps_p (parameters), {} (initial values for variables),
     init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
-
 """
 
 # ----------------------------------------------------------------------------
@@ -165,11 +164,14 @@ model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY
 model.build()
 model.load()
 
-p1 = np.empty((200, 1))
+p1 = np.empty((8, 1))
 p1_view = pop1.vars["Vmem"].view
+p1_spike = pop1.current_spikes
 
-p2 = np.empty((200, 1))
-p2_view = pop2.vars["Vmem"].view
+p2 = np.empty((8, 1))
+p2_view = pop2.vars["Fx"].view
+
+print(p2_view)
 
 """#duplicate
 s = np.empty((8, 1))
@@ -178,13 +180,15 @@ s_view = pop1.vars["scaleVal"].view"""
 print(p1_view.shape)
 
 
-while model.t < 200.0:
+while model.t < 8.0:
     model.step_time()
 
     pop1.pull_var_from_device("Vmem")
+    pop1.pull_current_spikes_from_device()
     p1[model.timestep - 1,:]=p1_view[0]
+    #print(p1[model.timestep - 1, :])
 
-    pop2.pull_var_from_device("Vmem")
+    pop2.pull_var_from_device("Fx")
     p2[model.timestep - 1,:]=p2_view[0]
 
 """    pop1.pull_var_from_device("scaleVal")
@@ -193,12 +197,12 @@ while model.t < 200.0:
 
 
 fig, axis = plt.subplots()
-axis.plot(p1)
-axis.plot(p2)
+axis.plot(p1, label="population 1")
+axis.plot(p2, label="population 2")
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FS Neuron")
-
+plt.legend(loc="upper left")
 plt.show()
 
 
@@ -227,4 +231,10 @@ def getSpikeTrain():
 print("fs conversion\n\n",ini.get("input"), "->", ''.join(getSpikeTrain()))"""
 
 
-#
+"""
+## TODO: Graph not displaying expected results.
+
+Shouldn't Fx be delayed by x_timesteps
+"""
+
+# dan goodman Imperial

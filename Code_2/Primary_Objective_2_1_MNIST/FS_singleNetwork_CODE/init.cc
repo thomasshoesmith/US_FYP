@@ -140,7 +140,7 @@ void initialize() {
                  {
                     for (unsigned j = 0; j < group->numTrgNeurons; j++) {
                         scalar initVal;
-                        initVal = (-8.00000000000000000e+00f);
+                        initVal = (1.00000000000000000e+00f);
                         group->g[(i * group->rowStride) + j] = initVal;
                     }
                 }
