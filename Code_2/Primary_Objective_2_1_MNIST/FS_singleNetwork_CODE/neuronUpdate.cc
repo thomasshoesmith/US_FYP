@@ -154,7 +154,7 @@ void updateNeurons(float t) {
                 
                 // Calculate magic constants. For RelU hT=h=T
                 // **NOTE** d uses last timestep as that was when spike was SENT
-                const scalar hT = (7.81250000000000000e-02f) * (1 << (kInt - (1 + pipeTimestep)));
+                const scalar hT = (7.81250000000000000e-02f) * (1 << (kInt - (1 + (pipeTimestep % kInt))));
                 const scalar d = (7.81250000000000000e-02f) * (1 << ((kInt - pipeTimestep) % kInt));
                 
                 // Accumulate input

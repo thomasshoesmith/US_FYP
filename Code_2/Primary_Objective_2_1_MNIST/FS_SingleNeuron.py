@@ -88,7 +88,7 @@ fs_model = create_custom_neuron_class(
 
     // Calculate magic constants. For RelU hT=h=T
     // **NOTE** d uses last timestep as that was when spike was SENT
-    const scalar hT = $(scale) * (1 << (kInt - (1 + pipeTimestep)));
+    const scalar hT = $(scale) * (1 << (kInt - (1 + (pipeTimestep % kInt))));
     const scalar d = $(upstreamScale) * (1 << ((kInt - pipeTimestep) % kInt));
 
     // Accumulate input
@@ -157,48 +157,33 @@ model.add_synapse_population(
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
 
-"""
-// Notes on adding a synapse pop
-model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
-    pop1, pop1, <= connections
-    "StaticPulse" (predefined *update model*, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
-    "ExpCond" ("DeltaCurr"!, should work), ps_p (parameters), {} (initial values for variables),
-    init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
-"""
+model.build()
+model.load()
 
 # ----------------------------------------------------------------------------
 # Displaying Vmem
 # ----------------------------------------------------------------------------
 
-model.build()
-model.load()
+timesteps = 10
 
-p1 = np.empty((20, 1))
+p1 = np.empty((timesteps, 1))
 p1_view = pop1.vars["Vmem"].view
-p1_spike = pop2.current_spikes
+#p1_spike = pop2.current_spikes
+print(type(p1_view))
 
-p2 = np.empty((20, 1))
+p2 = np.empty((timesteps, 1))
 p2_view = pop2.vars["Fx"].view
 
-p3 = np.empty((20, 1))
+p3 = np.empty((timesteps, 1))
 p3_view = pop3.vars["Fx"].view
 
-print(p2_view)
-
-"""#duplicate
-s = np.empty((8, 1))
-s_view = pop1.vars["scaleVal"].view"""
-
-print(p1_view.shape)
-
-
-while model.t < 20.0:
+while model.t < timesteps:
     model.step_time()
 
     pop1.pull_var_from_device("Vmem")
-    pop1.pull_current_spikes_from_device()
+    #pop1.pull_current_spikes_from_device()
     p1[model.timestep - 1,:]=p1_view[0]
-    print(p1_spike)
+    #print(p1_spike)
 
     pop2.pull_var_from_device("Fx")
     p2[model.timestep - 1,:]=p2_view[0]
@@ -214,7 +199,10 @@ axis.plot(p3, label="population 3")
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FS Neuron")
-plt.legend(loc="upper left")
+for i in range(timesteps):
+    plt.axvline(x=i, color='r', linestyle=(0, (5, 5)))
+plt.axhline(y = ini_input.get("input"), color='r', linestyle=(0, (5, 5)))
+plt.legend()
 plt.show()
 
 
@@ -247,6 +235,16 @@ print("fs conversion\n\n",ini.get("input"), "->", ''.join(getSpikeTrain()))"""
 ## TODO: Graph not displaying expected results.
 
 Shouldn't Fx be delayed by x_timesteps
+"""
+
+
+"""
+// Notes on adding a synapse pop
+model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
+    pop1, pop1, <= connections
+    "StaticPulse" (predefined *update model*, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
+    "ExpCond" ("DeltaCurr"!, should work), ps_p (parameters), {} (initial values for variables),
+    init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
 """
 
 # dan goodman Imperial
