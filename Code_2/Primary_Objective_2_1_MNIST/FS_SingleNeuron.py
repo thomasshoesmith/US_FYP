@@ -19,6 +19,11 @@ PRESENT_TIMESTEPS = 100
 INPUT_CURRENT_SCALE = 1.0 / 100.0
 
 # ----------------------------------------------------------------------------
+# CUstom weight update model
+# ----------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------
 # Parameters for FS Input Neuron
 # ----------------------------------------------------------------------------
 
@@ -167,9 +172,10 @@ model.load()
 timesteps = 10
 
 p1 = np.empty((timesteps, 1))
+p1_npspike = []
+
 p1_view = pop1.vars["Vmem"].view
-#p1_spike = pop2.current_spikes
-print(type(p1_view))
+#p1_spike = pop1.current_spikes()
 
 p2 = np.empty((timesteps, 1))
 p2_view = pop2.vars["Fx"].view
@@ -180,30 +186,47 @@ p3_view = pop3.vars["Fx"].view
 while model.t < timesteps:
     model.step_time()
 
-    pop1.pull_var_from_device("Vmem")
-    #pop1.pull_current_spikes_from_device()
+    #print(pop1.pull_current_spikes_from_device())
+
+    # neuron 1
+    #pop1.pull_var_from_device("Vmem")
+    # spike timestep
+
     p1[model.timestep - 1,:]=p1_view[0]
-    #print(p1_spike)
+    p1_npspike.append(pop1.current_spikes.shape[0])
 
-    pop2.pull_var_from_device("Fx")
+
+    # neuron 2
+    #pop2.pull_var_from_device("Fx")
     p2[model.timestep - 1,:]=p2_view[0]
+    print(pop2.current_spikes.shape[0])
 
-    pop3.pull_var_from_device("Fx")
+    # neuron 3
+    #pop3.pull_var_from_device("Fx")
     p3[model.timestep - 1,:]=p3_view[0]
 
 
+#print(p1_npspike)
+
+for i in range(len(p1_npspike)):
+    p1_npspike[i] = ini_input.get("input") * p1_npspike[i]
+
 fig, axis = plt.subplots()
+axis.bar(np.arange(timesteps), p1_npspike, 0.02, color='r', label = "Spikes")
 axis.plot(p1, label="population 1")
 axis.plot(p2, label="population 2")
 axis.plot(p3, label="population 3")
+
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FS Neuron")
-for i in range(timesteps):
+"""for i in range(timesteps):
     plt.axvline(x=i, color='r', linestyle=(0, (5, 5)))
-plt.axhline(y = ini_input.get("input"), color='r', linestyle=(0, (5, 5)))
+plt.axhline(y = ini_input.get("input"), color='r', linestyle=(0, (5, 5)))"""
 plt.legend()
 plt.show()
+
+
 
 
 
@@ -247,4 +270,8 @@ model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY
     init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
 """
 
-# dan goodman Imperial
+# Dan Goodman Imperial
+
+# Sheffield - Stephie
+
+# UCL L
