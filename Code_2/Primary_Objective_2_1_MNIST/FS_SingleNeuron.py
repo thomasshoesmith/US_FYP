@@ -19,9 +19,10 @@ PRESENT_TIMESTEPS = 100
 INPUT_CURRENT_SCALE = 1.0 / 100.0
 
 # ----------------------------------------------------------------------------
-# CUstom weight update model
+# Custom weight update model
 # ----------------------------------------------------------------------------
 
+# add CWUP
 
 # ----------------------------------------------------------------------------
 # Parameters for FS Input Neuron
@@ -56,6 +57,8 @@ fs_input_model = create_custom_neuron_class(
     const scalar hT = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
 
     $(scaleVal) = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
+    //printf(" Vmem:%.6f ", $(Vmem));
+    //printf(" scaleVal:%.6f ", $(scaleVal));
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -99,12 +102,21 @@ fs_model = create_custom_neuron_class(
     // Accumulate input
     // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
     $(Fx) += ($(Isyn) * d);
+    //printf(" isyn:%.6f ",($(Isyn) * d));
+    //printf(" d:%d ", d);
+
+    printf(" pipeTimestep@0:%d ", pipeTimestep);
 
     // If this is the first timestep, apply input
-    if(pipeTimestep == 0) {
+    //printf(" pipeTimestep:%d ", pipeTimestep);
+    // try (1,7), (8, 7), (1, 0)
+    if(pipeTimestep == 8) {
+        //printf(" pipeTimestep@0:%d ", pipeTimestep);
+        //printf(" Fx:%.6f ", $(Fx));
         $(Vmem) = $(Fx);
         $(Fx) = 0.0;
     }
+    //printf(" Vmem:%.6f ", $(Vmem));
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -114,6 +126,51 @@ fs_model = create_custom_neuron_class(
     ''',
     is_auto_refractory_required=False)
 
+
+fs_model_2 = create_custom_neuron_class(
+    'fs_relu',
+    param_names=['K', 'alpha', 'upstreamAlpha'],
+    derived_params=[("scale", create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))()),
+                    ("upstreamScale", create_dpf_class(lambda pars, dt: pars[2] * 2**(-pars[0]))())],
+    var_name_types=[('Fx', 'scalar'), ('Vmem', 'scalar')],
+    sim_code='''
+    // Convert K to integer
+    const int kInt = (int)$(K);
+
+    // Get timestep within presentation
+    const int pipeTimestep = (int)($(t) / DT);
+
+    // Calculate magic constants. For RelU hT=h=T
+    // **NOTE** d uses last timestep as that was when spike was SENT
+    const scalar hT = $(scale) * (1 << (kInt - (1 + (pipeTimestep % kInt))));
+    const scalar d = $(upstreamScale) * (1 << ((kInt - pipeTimestep) % kInt));
+
+    // Accumulate input
+    // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
+    $(Fx) += ($(Isyn) * d);
+    printf(" isyn:%.6f ",($(Isyn) * d));
+    printf(" d:%d ", d);
+
+    printf(" pipeTimestep@0:%d ", pipeTimestep);
+    printf(" Fx:%.6f ", $(Fx));
+
+    // If this is the first timestep, apply input
+    //printf(" pipeTimestep:%d ", pipeTimestep);
+    if(pipeTimestep == 7) {
+        //printf(" pipeTimestep@0:%d ", pipeTimestep);
+        printf(" Fx:%.6f ", $(Fx));
+        $(Vmem) = $(Fx);
+        $(Fx) = 0.0;
+    }
+    //printf(" Vmem:%.6f ", $(Vmem));
+    ''',
+    threshold_condition_code='''
+    $(Vmem) >= hT
+    ''',
+    reset_code='''
+    $(Vmem) -= hT;
+    ''',
+    is_auto_refractory_required=False)
 
 # ----------------------------------------------------------------------------
 # Build model
@@ -133,12 +190,14 @@ ini = {"Fx": 0.0,  # input Value
 
 
 
-# Create first neuron layer
+# Create first neuron
 pop1 = model.add_neuron_population("neuron1", 1, fs_input_model, FS_INPUT_PARAM, ini_input)
 
+# Create second neuron
 pop2 = model.add_neuron_population("neuron2", 1, fs_model, FS_PARAM, ini)
 
-pop3 = model.add_neuron_population("neuron3", 1, fs_model, FS_PARAM, ini)
+# Create third neuron
+pop3 = model.add_neuron_population("neuron3", 1, fs_model_2, FS_PARAM, ini)
 
 # ----------------------------------------------------------------------------
 # Parameters for synapse
@@ -149,15 +208,16 @@ s_ini = {"g": 1.0} #weight
 ps_p = {"tau": 0.0, # Decay time constant [ms]
         "E": 0.0} # Reversal potential [mV]
 
+# synapse connection between neurons 1 & 2
 model.add_synapse_population(
-    "synapse1", "DENSE_INDIVIDUALG", NO_DELAY,
+    "synapse1", "DENSE_INDIVIDUALG", 0,
     pop1, pop2,
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
 
-
+# synapse connection between neurons 2 & 3
 model.add_synapse_population(
-    "synapse2", "DENSE_INDIVIDUALG", NO_DELAY,
+    "synapse2", "DENSE_INDIVIDUALG", 0,
     pop2, pop3,
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
@@ -169,73 +229,105 @@ model.load()
 # Displaying Vmem
 # ----------------------------------------------------------------------------
 
-timesteps = 10
+timesteps = 20
 
-p1 = np.empty((timesteps, 1))
+
 p1_npspike = []
+p2_npspike = []
+p3_npspike = []
 
-p1_view = pop1.vars["Vmem"].view
-#p1_spike = pop1.current_spikes()
+#Vmem across neurons
+p1_Vmem = np.empty((timesteps, 1))
+p1_view_Vmem = pop1.vars["Vmem"].view
 
-p2 = np.empty((timesteps, 1))
-p2_view = pop2.vars["Fx"].view
+p2_Vmem = np.empty((timesteps, 1))
+p2_view_Vmem = pop2.vars["Vmem"].view
 
-p3 = np.empty((timesteps, 1))
-p3_view = pop3.vars["Fx"].view
+p3_Vmem = np.empty((timesteps, 1))
+p3_view_Vmem = pop3.vars["Vmem"].view
+
+#fx across >1 neurons
+p2_Fx = np.empty((timesteps, 1))
+p2_view_Fx = pop2.vars["Fx"].view
+
+p3_Fx = np.empty((timesteps, 1))
+p3_view_Fx = pop3.vars["Fx"].view
 
 while model.t < timesteps:
+    print("timestep:", model.t, "\n")
     model.step_time()
 
-    #print(pop1.pull_current_spikes_from_device())
-
     # neuron 1
-    #pop1.pull_var_from_device("Vmem")
-    # spike timestep
-
-    p1[model.timestep - 1,:]=p1_view[0]
+    pop1.pull_var_from_device("Vmem")
+    p1_Vmem[model.timestep - 1,:]=p1_view_Vmem[0]
+    pop1.pull_current_spikes_from_device()
     p1_npspike.append(pop1.current_spikes.shape[0])
 
-
     # neuron 2
-    #pop2.pull_var_from_device("Fx")
-    p2[model.timestep - 1,:]=p2_view[0]
-    print(pop2.current_spikes.shape[0])
+    pop2.pull_var_from_device("Vmem")
+    p2_Vmem[model.timestep - 1,:]=p2_view_Vmem[0]
+    pop2.pull_var_from_device("Fx")
+    p2_Fx[model.timestep - 1,:]=p2_view_Fx[0]
+    pop2.pull_current_spikes_from_device()
+    p2_npspike.append(pop2.current_spikes.shape[0])
 
     # neuron 3
-    #pop3.pull_var_from_device("Fx")
-    p3[model.timestep - 1,:]=p3_view[0]
+    pop3.pull_var_from_device("Vmem")
+    p3_Vmem[model.timestep - 1,:]=p3_view_Vmem[0]
+    pop3.pull_var_from_device("Fx")
+    p3_Fx[model.timestep - 1,:]=p3_view_Fx[0]
+    pop3.pull_current_spikes_from_device()
+    p3_npspike.append(pop3.current_spikes.shape[0])
 
-
-#print(p1_npspike)
-
+# creating height of the spikes to match the input value
 for i in range(len(p1_npspike)):
     p1_npspike[i] = ini_input.get("input") * p1_npspike[i]
+    p2_npspike[i] = ini_input.get("input") * p2_npspike[i]
+    p3_npspike[i] = ini_input.get("input") * p3_npspike[i]
 
-fig, axis = plt.subplots()
-axis.bar(np.arange(timesteps), p1_npspike, 0.02, color='r', label = "Spikes")
-axis.plot(p1, label="population 1")
-axis.plot(p2, label="population 2")
-axis.plot(p3, label="population 3")
+
+fig, axis = plt.subplots(3, figsize=(5, 10))
+
+plt.subplots_adjust(left=0.1,
+                    bottom=0.2,
+                    right=0.9,
+                    top=0.9,
+                    wspace=1.0,
+                    hspace=1.0)
+# Vmem values
+axis[0].set_title("FS Neuron ( Vmem )")
+axis[0].plot(p1_Vmem, label="Neuron 1 Vmem", color='b')
+axis[0].plot(p2_Vmem, label="Neuron 2 Vmem", color='r')
+axis[0].plot(p3_Vmem, label="Neuron 3 Vmem", color='g')
+axis[0].legend()
+
+# Fx values (neurons 23)
+axis[1].set_title("FS Neuron ( Fx )")
+axis[1].plot(p2_Fx, label="Neuron 2 Fx", color='r')
+axis[1].plot(p3_Fx, label="Neuron 3 Fx", color='g')
+axis[1].legend()
+axis[1].set_ylim(-1, ini_input.get("input") + 2)
+
+# output spike trains for neuron 1, 2  3
+axis[2].set_title("Spike train")
+axis[2].bar(np.arange(timesteps), p1_npspike, 0.1, color='b', label = "Neuron 1 Spikes")
+axis[2].bar(np.arange(timesteps), p2_npspike, 0.1, color='r', label = "Neuron 2 Spikes")
+axis[2].bar(np.arange(timesteps), p3_npspike, 0.1, color='g', label = "Nauron 3 Spikes")
+axis[2].legend()
+
+
 
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
-plt.title("FS Neuron")
-"""for i in range(timesteps):
-    plt.axvline(x=i, color='r', linestyle=(0, (5, 5)))
-plt.axhline(y = ini_input.get("input"), color='r', linestyle=(0, (5, 5)))"""
-plt.legend()
+
 plt.show()
 
-
-
-
+print(p1_npspike)
 
 # ----------------------------------------------------------------------------
-# Testing Playbox
+# Testing Playbox | code cemetery
 # ----------------------------------------------------------------------------
 
-#print(s)
-#print(v)
 """
 def getSpikeTrain():
     z = []

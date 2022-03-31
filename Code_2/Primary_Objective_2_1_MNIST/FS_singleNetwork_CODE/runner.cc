@@ -400,9 +400,9 @@ void allocateMem() {
     pushMergedNeuronInitGroup1ToDevice(1, glbSpkCntneuron3, glbSpkneuron3, Fxneuron3, Vmemneuron3, inSynsynapse2, 1);
     pushMergedSynapseDenseInitGroup0ToDevice(0, gsynapse1, 1, 1, 1);
     pushMergedSynapseDenseInitGroup0ToDevice(1, gsynapse2, 1, 1, 1);
-    pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
-    pushMergedNeuronUpdateGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
-    pushMergedNeuronUpdateGroup1ToDevice(1, glbSpkCntneuron3, glbSpkneuron3, Fxneuron3, Vmemneuron3, inSynsynapse2, 1);
+    pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron3, glbSpkneuron3, Fxneuron3, Vmemneuron3, inSynsynapse2, 1);
+    pushMergedNeuronUpdateGroup1ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
+    pushMergedNeuronUpdateGroup2ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
     pushMergedPresynapticUpdateGroup0ToDevice(0, inSynsynapse1, glbSpkCntneuron1, glbSpkneuron1, gsynapse1, 1, 1, 1);
     pushMergedPresynapticUpdateGroup0ToDevice(1, inSynsynapse2, glbSpkCntneuron2, glbSpkneuron2, gsynapse2, 1, 1, 1);
     pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(0, glbSpkCntneuron1);
