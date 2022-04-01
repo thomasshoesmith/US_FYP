@@ -30,6 +30,7 @@ scalar* Vmemneuron1;
 scalar* scaleValneuron1;
 unsigned int* glbSpkCntneuron2;
 unsigned int* glbSpkneuron2;
+unsigned int spkQuePtrneuron2 = 0;
 scalar* Fxneuron2;
 scalar* Vmemneuron2;
 unsigned int* glbSpkCntneuron3;
@@ -290,11 +291,11 @@ scalar* getCurrentscaleValneuron1(unsigned int batch) {
 }
 
 unsigned int* getneuron2CurrentSpikes(unsigned int batch) {
-    return (glbSpkneuron2);
+    return (glbSpkneuron2 + (spkQuePtrneuron2 * 1));
 }
 
 unsigned int& getneuron2CurrentSpikeCount(unsigned int batch) {
-    return glbSpkCntneuron2[0];
+    return glbSpkCntneuron2[spkQuePtrneuron2];
 }
 
 scalar* getCurrentFxneuron2(unsigned int batch) {
@@ -366,8 +367,8 @@ void allocateMem() {
     inputneuron1 = new scalar[1];
     Vmemneuron1 = new scalar[1];
     scaleValneuron1 = new scalar[1];
-    glbSpkCntneuron2 = new unsigned int[1];
-    glbSpkneuron2 = new unsigned int[1];
+    glbSpkCntneuron2 = new unsigned int[2];
+    glbSpkneuron2 = new unsigned int[2];
     Fxneuron2 = new scalar[1];
     Vmemneuron2 = new scalar[1];
     glbSpkCntneuron3 = new unsigned int[1];
@@ -396,18 +397,18 @@ void allocateMem() {
     gsynapse2 = new scalar[1];
     
     pushMergedNeuronInitGroup0ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
-    pushMergedNeuronInitGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
-    pushMergedNeuronInitGroup1ToDevice(1, glbSpkCntneuron3, glbSpkneuron3, Fxneuron3, Vmemneuron3, inSynsynapse2, 1);
+    pushMergedNeuronInitGroup1ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, &spkQuePtrneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
+    pushMergedNeuronInitGroup2ToDevice(0, glbSpkCntneuron3, glbSpkneuron3, Fxneuron3, Vmemneuron3, inSynsynapse2, 1);
     pushMergedSynapseDenseInitGroup0ToDevice(0, gsynapse1, 1, 1, 1);
     pushMergedSynapseDenseInitGroup0ToDevice(1, gsynapse2, 1, 1, 1);
     pushMergedNeuronUpdateGroup0ToDevice(0, glbSpkCntneuron3, glbSpkneuron3, Fxneuron3, Vmemneuron3, inSynsynapse2, 1);
     pushMergedNeuronUpdateGroup1ToDevice(0, glbSpkCntneuron1, glbSpkneuron1, inputneuron1, Vmemneuron1, scaleValneuron1, 1);
-    pushMergedNeuronUpdateGroup2ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
-    pushMergedPresynapticUpdateGroup0ToDevice(0, inSynsynapse1, glbSpkCntneuron1, glbSpkneuron1, gsynapse1, 1, 1, 1);
-    pushMergedPresynapticUpdateGroup0ToDevice(1, inSynsynapse2, glbSpkCntneuron2, glbSpkneuron2, gsynapse2, 1, 1, 1);
+    pushMergedNeuronUpdateGroup2ToDevice(0, glbSpkCntneuron2, glbSpkneuron2, &spkQuePtrneuron2, Fxneuron2, Vmemneuron2, inSynsynapse1, 1);
+    pushMergedPresynapticUpdateGroup0ToDevice(0, inSynsynapse1, glbSpkCntneuron1, glbSpkneuron1, &spkQuePtrneuron2, gsynapse1, 1, 1, 1);
+    pushMergedPresynapticUpdateGroup1ToDevice(0, inSynsynapse2, glbSpkCntneuron2, glbSpkneuron2, &spkQuePtrneuron2, gsynapse2, 1, 1, 1);
     pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(0, glbSpkCntneuron1);
-    pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(1, glbSpkCntneuron2);
-    pushMergedNeuronSpikeQueueUpdateGroup1ToDevice(0, glbSpkCntneuron3);
+    pushMergedNeuronSpikeQueueUpdateGroup1ToDevice(0, &spkQuePtrneuron2, glbSpkCntneuron2);
+    pushMergedNeuronSpikeQueueUpdateGroup2ToDevice(0, glbSpkCntneuron3);
 }
 
 void freeMem() {
@@ -463,6 +464,7 @@ size_t getFreeDeviceMemBytes() {
 
 void stepTime() {
     updateSynapses(t);
+    spkQuePtrneuron2 = (spkQuePtrneuron2 + 1) % 2;
     updateNeurons(t); 
     iT++;
     t = iT*DT;

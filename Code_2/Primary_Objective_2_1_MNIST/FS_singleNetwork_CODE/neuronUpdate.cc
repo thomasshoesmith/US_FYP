@@ -27,6 +27,7 @@ struct MergedNeuronUpdateGroup2
  {
     unsigned int* spkCnt;
     unsigned int* spk;
+    unsigned int* spkQuePtr;
     scalar* Fx;
     scalar* Vmem;
     float* inSynInSyn0;
@@ -41,6 +42,13 @@ struct MergedNeuronSpikeQueueUpdateGroup0
 }
 ;
 struct MergedNeuronSpikeQueueUpdateGroup1
+ {
+    unsigned int* spkQuePtr;
+    unsigned int* spkCnt;
+    
+}
+;
+struct MergedNeuronSpikeQueueUpdateGroup2
  {
     unsigned int* spkCnt;
     
@@ -65,21 +73,27 @@ void pushMergedNeuronUpdateGroup1ToDevice(unsigned int idx, unsigned int* spkCnt
     mergedNeuronUpdateGroup1[idx].numNeurons = numNeurons;
 }
 static MergedNeuronUpdateGroup2 mergedNeuronUpdateGroup2[1];
-void pushMergedNeuronUpdateGroup2ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
+void pushMergedNeuronUpdateGroup2ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, unsigned int* spkQuePtr, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
     mergedNeuronUpdateGroup2[idx].spkCnt = spkCnt;
     mergedNeuronUpdateGroup2[idx].spk = spk;
+    mergedNeuronUpdateGroup2[idx].spkQuePtr = spkQuePtr;
     mergedNeuronUpdateGroup2[idx].Fx = Fx;
     mergedNeuronUpdateGroup2[idx].Vmem = Vmem;
     mergedNeuronUpdateGroup2[idx].inSynInSyn0 = inSynInSyn0;
     mergedNeuronUpdateGroup2[idx].numNeurons = numNeurons;
 }
-static MergedNeuronSpikeQueueUpdateGroup0 mergedNeuronSpikeQueueUpdateGroup0[2];
+static MergedNeuronSpikeQueueUpdateGroup0 mergedNeuronSpikeQueueUpdateGroup0[1];
 void pushMergedNeuronSpikeQueueUpdateGroup0ToDevice(unsigned int idx, unsigned int* spkCnt) {
     mergedNeuronSpikeQueueUpdateGroup0[idx].spkCnt = spkCnt;
 }
 static MergedNeuronSpikeQueueUpdateGroup1 mergedNeuronSpikeQueueUpdateGroup1[1];
-void pushMergedNeuronSpikeQueueUpdateGroup1ToDevice(unsigned int idx, unsigned int* spkCnt) {
+void pushMergedNeuronSpikeQueueUpdateGroup1ToDevice(unsigned int idx, unsigned int* spkQuePtr, unsigned int* spkCnt) {
+    mergedNeuronSpikeQueueUpdateGroup1[idx].spkQuePtr = spkQuePtr;
     mergedNeuronSpikeQueueUpdateGroup1[idx].spkCnt = spkCnt;
+}
+static MergedNeuronSpikeQueueUpdateGroup2 mergedNeuronSpikeQueueUpdateGroup2[1];
+void pushMergedNeuronSpikeQueueUpdateGroup2ToDevice(unsigned int idx, unsigned int* spkCnt) {
+    mergedNeuronSpikeQueueUpdateGroup2[idx].spkCnt = spkCnt;
 }
 // ------------------------------------------------------------------------
 // merged extra global parameter functions
@@ -90,7 +104,7 @@ void pushMergedNeuronSpikeQueueUpdateGroup1ToDevice(unsigned int idx, unsigned i
 void updateNeurons(float t) {
      {
         // merged neuron spike queue update group 0
-        for(unsigned int g = 0; g < 2; g++) {
+        for(unsigned int g = 0; g < 1; g++) {
             const auto *group = &mergedNeuronSpikeQueueUpdateGroup0[g]; 
             group->spkCnt[0] = 0;
         }
@@ -99,6 +113,13 @@ void updateNeurons(float t) {
         // merged neuron spike queue update group 1
         for(unsigned int g = 0; g < 1; g++) {
             const auto *group = &mergedNeuronSpikeQueueUpdateGroup1[g]; 
+            group->spkCnt[*group->spkQuePtr] = 0; 
+        }
+    }
+     {
+        // merged neuron spike queue update group 2
+        for(unsigned int g = 0; g < 1; g++) {
+            const auto *group = &mergedNeuronSpikeQueueUpdateGroup2[g]; 
             group->spkCnt[0] = 0;
         }
     }
@@ -136,17 +157,16 @@ void updateNeurons(float t) {
                 // Accumulate input
                 // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
                 lFx += (Isyn * d);
-                printf(" isyn:%.6f ",(Isyn * d));
-                printf(" d:%d ", d);
+                //printf(" isyn:%.6f ",(Isyn * d));
+                //printf(" d:%d ", d);
                 
                 printf(" pipeTimestep@0:%d ", pipeTimestep);
-                printf(" Fx:%.6f ", lFx);
                 
                 // If this is the first timestep, apply input
                 //printf(" pipeTimestep:%d ", pipeTimestep);
-                if(pipeTimestep == 7) {
+                if(pipeTimestep == 8) {
                     //printf(" pipeTimestep@0:%d ", pipeTimestep);
-                    printf(" Fx:%.6f ", lFx);
+                    //printf(" Fx:%.6f ", lFx);
                     lVmem = lFx;
                     lFx = 0.0f;
                 }
@@ -217,6 +237,8 @@ void updateNeurons(float t) {
         // merged neuron update group 2
         for(unsigned int g = 0; g < 1; g++) {
             const auto *group = &mergedNeuronUpdateGroup2[g]; 
+            const unsigned int readDelayOffset = (((*group->spkQuePtr + 1) % 2) * group->numNeurons);
+            const unsigned int writeDelayOffset = (*group->spkQuePtr * group->numNeurons);
             
             for(unsigned int i = 0; i < group->numNeurons; i++) {
                 scalar lFx = group->Fx[i];
@@ -254,7 +276,6 @@ void updateNeurons(float t) {
                 
                 // If this is the first timestep, apply input
                 //printf(" pipeTimestep:%d ", pipeTimestep);
-                // try (1,7), (8, 7), (1, 0)
                 if(pipeTimestep == 8) {
                     //printf(" pipeTimestep@0:%d ", pipeTimestep);
                     //printf(" Fx:%.6f ", lFx);
@@ -267,7 +288,7 @@ void updateNeurons(float t) {
                 if (
                 lVmem >= hT
                 ) {
-                    group->spk[group->spkCnt[0]++] = i;
+                    group->spk[writeDelayOffset + group->spkCnt[*group->spkQuePtr]++] = i;
                     // spike reset code
                     
                     lVmem -= hT;

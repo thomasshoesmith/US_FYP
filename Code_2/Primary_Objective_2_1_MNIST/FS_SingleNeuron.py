@@ -109,7 +109,6 @@ fs_model = create_custom_neuron_class(
 
     // If this is the first timestep, apply input
     //printf(" pipeTimestep:%d ", pipeTimestep);
-    // try (1,7), (8, 7), (1, 0)
     if(pipeTimestep == 8) {
         //printf(" pipeTimestep@0:%d ", pipeTimestep);
         //printf(" Fx:%.6f ", $(Fx));
@@ -126,51 +125,6 @@ fs_model = create_custom_neuron_class(
     ''',
     is_auto_refractory_required=False)
 
-
-fs_model_2 = create_custom_neuron_class(
-    'fs_relu',
-    param_names=['K', 'alpha', 'upstreamAlpha'],
-    derived_params=[("scale", create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))()),
-                    ("upstreamScale", create_dpf_class(lambda pars, dt: pars[2] * 2**(-pars[0]))())],
-    var_name_types=[('Fx', 'scalar'), ('Vmem', 'scalar')],
-    sim_code='''
-    // Convert K to integer
-    const int kInt = (int)$(K);
-
-    // Get timestep within presentation
-    const int pipeTimestep = (int)($(t) / DT);
-
-    // Calculate magic constants. For RelU hT=h=T
-    // **NOTE** d uses last timestep as that was when spike was SENT
-    const scalar hT = $(scale) * (1 << (kInt - (1 + (pipeTimestep % kInt))));
-    const scalar d = $(upstreamScale) * (1 << ((kInt - pipeTimestep) % kInt));
-
-    // Accumulate input
-    // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
-    $(Fx) += ($(Isyn) * d);
-    printf(" isyn:%.6f ",($(Isyn) * d));
-    printf(" d:%d ", d);
-
-    printf(" pipeTimestep@0:%d ", pipeTimestep);
-    printf(" Fx:%.6f ", $(Fx));
-
-    // If this is the first timestep, apply input
-    //printf(" pipeTimestep:%d ", pipeTimestep);
-    if(pipeTimestep == 7) {
-        //printf(" pipeTimestep@0:%d ", pipeTimestep);
-        printf(" Fx:%.6f ", $(Fx));
-        $(Vmem) = $(Fx);
-        $(Fx) = 0.0;
-    }
-    //printf(" Vmem:%.6f ", $(Vmem));
-    ''',
-    threshold_condition_code='''
-    $(Vmem) >= hT
-    ''',
-    reset_code='''
-    $(Vmem) -= hT;
-    ''',
-    is_auto_refractory_required=False)
 
 # ----------------------------------------------------------------------------
 # Build model
@@ -197,7 +151,7 @@ pop1 = model.add_neuron_population("neuron1", 1, fs_input_model, FS_INPUT_PARAM,
 pop2 = model.add_neuron_population("neuron2", 1, fs_model, FS_PARAM, ini)
 
 # Create third neuron
-pop3 = model.add_neuron_population("neuron3", 1, fs_model_2, FS_PARAM, ini)
+pop3 = model.add_neuron_population("neuron3", 1, fs_model, FS_PARAM, ini)
 
 # ----------------------------------------------------------------------------
 # Parameters for synapse
@@ -217,7 +171,7 @@ model.add_synapse_population(
 
 # synapse connection between neurons 2 & 3
 model.add_synapse_population(
-    "synapse2", "DENSE_INDIVIDUALG", 0,
+    "synapse2", "DENSE_INDIVIDUALG", 1,
     pop2, pop3,
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
