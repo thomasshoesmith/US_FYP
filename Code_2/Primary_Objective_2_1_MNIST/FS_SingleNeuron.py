@@ -255,7 +255,7 @@ axis[0].plot(p1_Vmem, label="Neuron 1 Vmem", color='b')
 axis[0].plot(p2_Vmem, label="Neuron 2 Vmem", color='r')
 axis[0].plot(p3_Vmem, label="Neuron 3 Vmem", color='g')
 axis[0].legend()
-#axis[0].set_ylim(-1, ini_input.get("input") + 2)
+axis[0].set_ylim(-1, ini_input.get("input") + 2)
 
 
 # Fx values (neurons 23)
@@ -263,7 +263,7 @@ axis[1].set_title("FS Neuron ( Fx )")
 axis[1].plot(p2_Fx, label="Neuron 2 Fx", color='r')
 axis[1].plot(p3_Fx, label="Neuron 3 Fx", color='g')
 axis[1].legend()
-#[1].set_ylim(-1, ini_input.get("input") + 2)
+axis[1].set_ylim(-1, ini_input.get("input") + 2)
 
 # output spike trains for neuron 1, 2  3
 axis[2].set_title("Spike train")
