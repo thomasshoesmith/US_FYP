@@ -102,15 +102,16 @@ fs_model = create_custom_neuron_class(
     // Accumulate input
     // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
     $(Fx) += ($(Isyn) * d);
-    //printf(" isyn:%.6f ",($(Isyn) * d));
-    //printf(" d:%d ", d);
+    printf(" isyn:%.6f ",($(Isyn) * d));
+    printf(" d:%d ", d);
 
-    printf(" pipeTimestep@0:%d ", pipeTimestep);
+    //printf(" pipeTimestep@0:%d ", pipeTimestep);
 
     // If this is the first timestep, apply input
     //printf(" pipeTimestep:%d ", pipeTimestep);
-    if(pipeTimestep == 8) {
-        //printf(" pipeTimestep@0:%d ", pipeTimestep);
+    // why is pipeTimestep = 0 and not MOD p % 8 = 0??
+    if(pipeTimestep % 8 == 0) {
+        //printf(" PipeTimestep@0:%d ", pipeTimestep);
         //printf(" Fx:%.6f ", $(Fx));
         $(Vmem) = $(Fx);
         $(Fx) = 0.0;
@@ -171,7 +172,7 @@ model.add_synapse_population(
 
 # synapse connection between neurons 2 & 3
 model.add_synapse_population(
-    "synapse2", "DENSE_INDIVIDUALG", 1,
+    "synapse2", "DENSE_INDIVIDUALG", 0,
     pop2, pop3,
     "StaticPulse", {}, s_ini, {}, {},
     "DeltaCurr", {}, {})
@@ -276,7 +277,7 @@ plt.ylabel("Membrane Voltage (Vmem)")
 
 plt.show()
 
-print(p1_npspike)
+#print(p1_npspike)
 
 # ----------------------------------------------------------------------------
 # Testing Playbox | code cemetery

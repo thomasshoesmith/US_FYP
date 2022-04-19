@@ -59,13 +59,12 @@ EXPORT_VAR unsigned int* glbSpkneuron1;
 EXPORT_VAR scalar* inputneuron1;
 EXPORT_VAR scalar* Vmemneuron1;
 EXPORT_VAR scalar* scaleValneuron1;
-#define spikeCount_neuron2 glbSpkCntneuron2[spkQuePtrneuron2]
-#define spike_neuron2 (glbSpkneuron2 + (spkQuePtrneuron2 * 1))
-#define glbSpkShiftneuron2 spkQuePtrneuron2*1
+#define spikeCount_neuron2 glbSpkCntneuron2[0]
+#define spike_neuron2 glbSpkneuron2
+#define glbSpkShiftneuron2 0
 
 EXPORT_VAR unsigned int* glbSpkCntneuron2;
 EXPORT_VAR unsigned int* glbSpkneuron2;
-EXPORT_VAR unsigned int spkQuePtrneuron2;
 EXPORT_VAR scalar* Fxneuron2;
 EXPORT_VAR scalar* Vmemneuron2;
 #define spikeCount_neuron3 glbSpkCntneuron3[0]

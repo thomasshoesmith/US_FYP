@@ -14,18 +14,6 @@ struct MergedNeuronInitGroup1
  {
     unsigned int* spkCnt;
     unsigned int* spk;
-    unsigned int* spkQuePtr;
-    scalar* Fx;
-    scalar* Vmem;
-    float* inSynInSyn0;
-    unsigned int numNeurons;
-    
-}
-;
-struct MergedNeuronInitGroup2
- {
-    unsigned int* spkCnt;
-    unsigned int* spk;
     scalar* Fx;
     scalar* Vmem;
     float* inSynInSyn0;
@@ -51,24 +39,14 @@ void pushMergedNeuronInitGroup0ToDevice(unsigned int idx, unsigned int* spkCnt, 
     mergedNeuronInitGroup0[idx].scaleVal = scaleVal;
     mergedNeuronInitGroup0[idx].numNeurons = numNeurons;
 }
-static MergedNeuronInitGroup1 mergedNeuronInitGroup1[1];
-void pushMergedNeuronInitGroup1ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, unsigned int* spkQuePtr, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
+static MergedNeuronInitGroup1 mergedNeuronInitGroup1[2];
+void pushMergedNeuronInitGroup1ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
     mergedNeuronInitGroup1[idx].spkCnt = spkCnt;
     mergedNeuronInitGroup1[idx].spk = spk;
-    mergedNeuronInitGroup1[idx].spkQuePtr = spkQuePtr;
     mergedNeuronInitGroup1[idx].Fx = Fx;
     mergedNeuronInitGroup1[idx].Vmem = Vmem;
     mergedNeuronInitGroup1[idx].inSynInSyn0 = inSynInSyn0;
     mergedNeuronInitGroup1[idx].numNeurons = numNeurons;
-}
-static MergedNeuronInitGroup2 mergedNeuronInitGroup2[1];
-void pushMergedNeuronInitGroup2ToDevice(unsigned int idx, unsigned int* spkCnt, unsigned int* spk, scalar* Fx, scalar* Vmem, float* inSynInSyn0, unsigned int numNeurons) {
-    mergedNeuronInitGroup2[idx].spkCnt = spkCnt;
-    mergedNeuronInitGroup2[idx].spk = spk;
-    mergedNeuronInitGroup2[idx].Fx = Fx;
-    mergedNeuronInitGroup2[idx].Vmem = Vmem;
-    mergedNeuronInitGroup2[idx].inSynInSyn0 = inSynInSyn0;
-    mergedNeuronInitGroup2[idx].numNeurons = numNeurons;
 }
 static MergedSynapseDenseInitGroup0 mergedSynapseDenseInitGroup0[2];
 void pushMergedSynapseDenseInitGroup0ToDevice(unsigned int idx, scalar* g, unsigned int rowStride, unsigned int numSrcNeurons, unsigned int numTrgNeurons) {
@@ -120,43 +98,8 @@ void initialize() {
     }
      {
         // merged neuron init group 1
-        for(unsigned int g = 0; g < 1; g++) {
+        for(unsigned int g = 0; g < 2; g++) {
             const auto *group = &mergedNeuronInitGroup1[g]; 
-            for(unsigned int d = 0; d < 2; d++) {
-                group->spkCnt[d] = 0;
-            }
-            for (unsigned i = 0; i < (group->numNeurons); i++) {
-                for(unsigned int d = 0; d < 2; d++) {
-                    group->spk[(d * group->numNeurons) + i] = 0;
-                }
-            }
-            *group->spkQuePtr = 0;
-             {
-                for (unsigned i = 0; i < (group->numNeurons); i++) {
-                    scalar initVal;
-                    initVal = (0.00000000000000000e+00f);
-                    group->Fx[i] = initVal;
-                }
-            }
-             {
-                for (unsigned i = 0; i < (group->numNeurons); i++) {
-                    scalar initVal;
-                    initVal = (0.00000000000000000e+00f);
-                    group->Vmem[i] = initVal;
-                }
-            }
-             {
-                for (unsigned i = 0; i < (group->numNeurons); i++) {
-                    group->inSynInSyn0[i] = 0.000000000e+00f;
-                }
-            }
-            // current source variables
-        }
-    }
-     {
-        // merged neuron init group 2
-        for(unsigned int g = 0; g < 1; g++) {
-            const auto *group = &mergedNeuronInitGroup2[g]; 
             group->spkCnt[0] = 0;
             for (unsigned i = 0; i < (group->numNeurons); i++) {
                 group->spk[i] = 0;
