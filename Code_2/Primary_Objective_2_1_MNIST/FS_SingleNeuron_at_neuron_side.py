@@ -19,57 +19,11 @@ PRESENT_TIMESTEPS = 100
 INPUT_CURRENT_SCALE = 1.0 / 100.0
 
 # ----------------------------------------------------------------------------
-# # TODO: Custom weight update model
+# Custom weight update model
 # ----------------------------------------------------------------------------
 
-"""
-        ### From GeNN Team Documentation ###
-def pygenn.genn_model.create_custom_weight_update_class 	(
-            class_name,
-		  	param_names = None,
-		  	var_name_types = None,
-		  	pre_var_name_types = None,
-		  	post_var_name_types = None,
-		  	derived_params = None,
-		  	sim_code = None,                                   # after a spike
-		  	event_code = None,                                 # after an event
-		  	learn_post_code = None,
-		  	synapse_dynamics_code = None,                      # sim code custom for each synapse
-		  	event_threshold_condition_code = None,             # to trigger the event code
-		  	pre_spike_code = None,
-		  	post_spike_code = None,
-		  	pre_dynamics_code = None,                          # alternative to synapse pre_dynamics_code, this will execute to the connections leaving a node
-		  	post_dynamics_code = None,                         # executes to the connections to a neuron.
-		  	sim_support_code = None,
-		  	learn_post_support_code = None,
-		  	synapse_dynamics_suppport_code = None,
-		  	extra_global_params = None,
-		  	is_pre_spike_time_required = None,
-		  	is_post_spike_time_required = None,
-		  	is_pre_spike_event_time_required = None,
-		  	is_prev_pre_spike_time_required = None,
-		  	is_prev_post_spike_time_required = None,
-		  	is_prev_pre_spike_event_time_required = None,
-		  	custom_body = None
-	) """
+# add CWUM
 
-fs_post_synpase_connection = create_custom_weight_update_class(
-    'fs_relu_synapse',
-    param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
-    derived_params=[("scale", create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))())],
-    var_name_types=[('input', 'scalar', VarAccess_READ_ONLY_DUPLICATE), ('Vmem', 'scalar'), ('scaleVal', 'scalar')],
-    sim_code="""
-    // # TODO: move sim from custom neuron class into custom synpase class
-    """,
-    event_threshold_condition_code='''
-    $(Vmem) >= hT
-    ''',
-    event_code='''
-    $(Vmem) -= hT;
-    '''
-    )
-
-)
 
 # ----------------------------------------------------------------------------
 # Parameters for FS Input Neuron
@@ -100,10 +54,12 @@ fs_input_model = create_custom_neuron_class(
         $(Vmem) = $(input);
     }
 
-    // check pipetimestep < K
+    // check pipetimestep < 8
     const scalar hT = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
 
     $(scaleVal) = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
+    printf(" 1Vmem:%.6f ", $(Vmem));
+    //printf(" scaleVal:%.6f ", $(scaleVal));
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -147,12 +103,20 @@ fs_model = create_custom_neuron_class(
     // Accumulate input
     // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
     $(Fx) += ($(Isyn) * d);
+    //printf(" isyn:%.6f ",($(Isyn) * d));
+    //printf(" d:%d ", d);
+
+    //printf(" pipeTimestep@0:%d ", pipeTimestep);
 
     // If this is the first timestep, apply input
+    //printf(" pipeTimestep:%d ", pipeTimestep);
     if(pipeTimestep == 0) {
+        //printf(" PipeTimestep@0:%d ", pipeTimestep);
+        //printf(" Fx:%.6f ", $(Fx));
         $(Vmem) = $(Fx);
         $(Fx) = 0.0;
     }
+    printf(" Vmem:%.6f ", $(Vmem));
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -273,7 +237,7 @@ while count < timesteps:
     pop3.pull_current_spikes_from_device()
     p3_npspike.append(pop3.current_spikes.shape[0])
 
-    if model.t == 8:
+    if model.t == 8: # change to 8;
         model.t = 0.0
         model.timestep = 0
 
@@ -372,6 +336,3 @@ model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY
 # Sheffield - Stephie
 
 # UCL L
-
-
-## bigger picture
