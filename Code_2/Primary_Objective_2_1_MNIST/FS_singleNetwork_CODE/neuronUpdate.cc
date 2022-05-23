@@ -169,7 +169,6 @@ void updateNeurons(float t) {
                 
                 // If this is the first timestep, apply input
                 //printf(" pipeTimestep:%d ", pipeTimestep);
-                // why is pipeTimestep = 0 and not MOD p % 8 = 0??
                 if(pipeTimestep == 0) {
                     //printf(" PipeTimestep@0:%d ", pipeTimestep);
                     //printf(" Fx:%.6f ", lFx);
