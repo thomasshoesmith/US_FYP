@@ -40,8 +40,13 @@ FS_INPUT_PARAM =  {"K":       8.0,      # K timestep length
 fs_input_model = create_custom_neuron_class(
     'fs_relu_input',
     param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
-    derived_params=[("scale", create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))())],
-    var_name_types=[('input', 'scalar', VarAccess_READ_ONLY_DUPLICATE), ('Vmem', 'scalar'), ('scaleVal', 'scalar')],
+    derived_params=[("scale",
+                    create_dpf_class(lambda pars, dt: pars[1] * 2**(-pars[0]))())],
+    var_name_types=[('input', 'scalar',
+                    VarAccess_READ_ONLY_DUPLICATE),
+                    ('Vmem', 'scalar'),
+                    ('scaleVal', 'scalar')],
+
     sim_code='''
     // Convert K to integer
     const int kInt = (int)$(K);
@@ -135,7 +140,7 @@ model = GeNNModel("float", "FS_singleNetwork")
 model.dT = TIMESTEP
 
 # Initial values to initialise all neurons to
-ini_input = {"input": 17.0,  # input Value
+ini_input = {"input": 10.1,  # input Value
              "Vmem": 0.0,   # voltage membrane value
              "scaleVal": 0.0}
 
