@@ -140,7 +140,7 @@ model = GeNNModel("float", "FS_singleNetwork")
 model.dT = TIMESTEP
 
 # Initial values to initialise all neurons to
-ini_input = {"input": 10.1,  # input Value
+ini_input = {"input": 13.6,  # input Value
              "Vmem": 0.0,   # voltage membrane value
              "scaleVal": 0.0}
 

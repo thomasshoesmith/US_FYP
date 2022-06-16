@@ -4,6 +4,7 @@ from os import path
 
 from pygenn.genn_model import (create_custom_neuron_class,
                                create_custom_current_source_class,
+                               create_custom_weight_update_class,
                                GeNNModel,
                                create_dpf_class)
 from pygenn.genn_wrapper import NO_DELAY
@@ -32,7 +33,7 @@ def pygenn.genn_model.create_custom_weight_update_class 	(
 		  	post_var_name_types = None,
 		  	derived_params = None,
 		  	sim_code = None,                                   # after a spike
-		  	event_code = None,                                 # after an event
+		  	event_code = None,                                 # after an event        [uses of events vs spikes?]
 		  	learn_post_code = None,
 		  	synapse_dynamics_code = None,                      # sim code custom for each synapse
 		  	event_threshold_condition_code = None,             # to trigger the event code
@@ -68,8 +69,6 @@ fs_post_synpase_connection = create_custom_weight_update_class(
     $(Vmem) -= hT;
     '''
     )
-
-)
 
 # ----------------------------------------------------------------------------
 # Parameters for FS Input Neuron

@@ -1,5 +1,0 @@
-tensorflow>=2.0
-pygenn>=0.4.5
-enum-compat
-six
-tqdm
