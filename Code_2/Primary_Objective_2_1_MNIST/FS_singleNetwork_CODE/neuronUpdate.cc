@@ -106,12 +106,10 @@ void updateNeurons(float t) {
                     lVmem = linput;
                 }
                 
-                // check pipetimestep < 8
+                // check pipetimestep < K
                 const scalar hT = (7.81250000000000000e-02f) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
                 
                 lscaleVal = (7.81250000000000000e-02f) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
-                printf("Vmem:%.6f ", lVmem);
-                //printf(" scaleVal:%.6f ", lscaleVal);
                 
                 // test for and register a true spike
                 if (
@@ -162,20 +160,12 @@ void updateNeurons(float t) {
                 // Accumulate input
                 // **NOTE** needs to be before applying input as spikes from LAST timestep must be processed
                 lFx += (Isyn * d);
-                //printf(" isyn:%.6f ",(Isyn * d));
-                //printf(" d:%d ", d);
-                
-                //printf(" pipeTimestep@0:%d ", pipeTimestep);
                 
                 // If this is the first timestep, apply input
-                //printf(" pipeTimestep:%d ", pipeTimestep);
                 if(pipeTimestep == 0) {
-                    //printf(" PipeTimestep@0:%d ", pipeTimestep);
-                    //printf(" Fx:%.6f ", lFx);
                     lVmem = lFx;
                     lFx = 0.0f;
                 }
-                printf(" Vmem:%.6f ", lVmem);
                 
                 // test for and register a true spike
                 if (

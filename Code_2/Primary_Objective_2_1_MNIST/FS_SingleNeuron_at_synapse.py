@@ -19,6 +19,13 @@ PRESENT_TIMESTEPS = 100
 INPUT_CURRENT_SCALE = 1.0 / 100.0
 
 # ----------------------------------------------------------------------------
+# Custom weight update model
+# ----------------------------------------------------------------------------
+
+# add CWUM
+
+
+# ----------------------------------------------------------------------------
 # Parameters for FS Input Neuron
 # ----------------------------------------------------------------------------
 
@@ -288,3 +295,49 @@ plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 
 plt.show()
+
+#print(p1_npspike)
+
+# ----------------------------------------------------------------------------
+# Testing Playbox | code cemetery
+# ----------------------------------------------------------------------------
+
+"""
+def getSpikeTrain():
+    z = []
+    if ini.get("input") > s[0]:
+        z.append("1")
+    else:
+        z.append("0")
+
+    for i in range(len(v)-1):
+        if v[i] >= s[i+1]:
+            z.append("1")
+        else:
+            z.append("0")
+    return z
+
+print("fs conversion\n\n",ini.get("input"), "->", ''.join(getSpikeTrain()))"""
+
+
+"""
+## TODO: Graph not displaying expected results.
+
+Shouldn't Fx be delayed by x_timesteps
+"""
+
+
+"""
+// Notes on adding a synapse pop
+model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
+    pop1, pop1, <= connections
+    "StaticPulse" (predefined *update model*, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
+    "ExpCond" ("DeltaCurr"!, should work), ps_p (parameters), {} (initial values for variables),
+    init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
+"""
+
+# Dan Goodman Imperial
+
+# Sheffield - Stephie
+
+# UCL L
