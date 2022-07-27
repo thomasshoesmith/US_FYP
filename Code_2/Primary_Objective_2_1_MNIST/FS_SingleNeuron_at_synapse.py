@@ -3,11 +3,13 @@ import matplotlib.pyplot as plt
 from os import path
 
 from pygenn.genn_model import (create_custom_neuron_class,
+                               create_custom_weight_update_class,
                                create_custom_current_source_class,
                                GeNNModel,
                                create_dpf_class)
 from pygenn.genn_wrapper import NO_DELAY
 from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
+from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY
 
 
 # ----------------------------------------------------------------------------
@@ -23,6 +25,21 @@ INPUT_CURRENT_SCALE = 1.0 / 100.0
 # ----------------------------------------------------------------------------
 
 # add CWUM
+
+FS_WUM = create_custom_weight_update_class(
+    'fs_wum',
+    var_name_types=[("g", "scalar", VarAccess_READ_ONLY)],
+    sim_code='''
+    $(addToInSyn, $(g));
+    ''',
+    event_code='''
+    $(addToInSyn, -$(g));
+    ''',
+    event_threshold_condition_code='''
+    $(input_pre) < 0.0 && spike
+    '''
+)
+
 
 
 # ----------------------------------------------------------------------------
