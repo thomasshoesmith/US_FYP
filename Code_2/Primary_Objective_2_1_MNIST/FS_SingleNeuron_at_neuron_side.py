@@ -63,7 +63,7 @@ fs_input_model = create_custom_neuron_class(
     const scalar hT = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
 
     $(scaleVal) = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
-    printf(" 1Vmem:%.6f ", $(Vmem));
+    printf("Vmem:%.6f ", $(Vmem));
     //printf(" scaleVal:%.6f ", $(scaleVal));
     ''',
     threshold_condition_code='''

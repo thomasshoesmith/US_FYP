@@ -110,7 +110,7 @@ void updateNeurons(float t) {
                 const scalar hT = (7.81250000000000000e-02f) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
                 
                 lscaleVal = (7.81250000000000000e-02f) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
-                printf(" 1Vmem:%.6f ", lVmem);
+                printf("Vmem:%.6f ", lVmem);
                 //printf(" scaleVal:%.6f ", lscaleVal);
                 
                 // test for and register a true spike
