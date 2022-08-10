@@ -75,7 +75,7 @@ void initialize() {
              {
                 for (unsigned i = 0; i < (group->numNeurons); i++) {
                     scalar initVal;
-                    initVal = (1.70000000000000000e+01f);
+                    initVal = (1.35999999999999996e+01f);
                     group->input[i] = initVal;
                 }
             }

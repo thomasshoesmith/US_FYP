@@ -50,7 +50,7 @@ from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 
 FP_PARAM =  {"K":       8.0,      # K timestep length
              "alpha":   20.0,     # alpha "max" Value
-             "elim":    4.0}      # elim number of bits to represent the exponent
+             "elim":    2.0}      # elim number of bits to represent the exponent
 
 TIMESTEP = 1.0
 PRESENT_TIMESTEPS = 100
@@ -117,7 +117,7 @@ model = GeNNModel("float", "FP_singleNetwork")
 model.dT = TIMESTEP
 
 # Initial values to initialise all neurons to
-ini = {"input": 17,  # input Value
+ini = {"input": 1.76,  # input Value
        "Vmem": 0.0,   # voltage membrane value
        "scaleVal": 0.0,
        "measure": 0.0,  #testing
@@ -153,7 +153,7 @@ axis.plot(v)
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 plt.title("FP Neuron")
-#plt.show()
+plt.show()
 
 
 

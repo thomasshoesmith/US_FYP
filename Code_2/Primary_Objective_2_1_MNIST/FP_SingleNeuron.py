@@ -50,7 +50,7 @@ from pygenn.genn_wrapper.Models import VarAccess_READ_ONLY_DUPLICATE
 
 FP_PARAM =  {"K":       8.0,      # K timestep length
              "alpha":   20.0,     # alpha "max" Value
-             "elim":    4.0}      # elim number of bits to represent the exponent
+             "elim":    2.0}      # elim number of bits to represent the exponent
 
 TIMESTEP = 1.0
 PRESENT_TIMESTEPS = 100
@@ -109,7 +109,6 @@ fp_relu_input_model = create_custom_neuron_class(
     }
 
     $(hT) = 0;
-
     $(measure) = 0;
 
     if (pipeTimestep >= elimInt) {
@@ -146,7 +145,7 @@ model = GeNNModel("float", "FP_singleNetwork")
 model.dT = TIMESTEP
 
 # Initial values to initialise all neurons to
-ini = {"input": 4.0,  # input Value
+ini = {"input": 7.23,  # input Value
        "Vmem": 0.0,   # voltage membrane value
        "scaleVal": 0.0,
        "measure": 0.0,  #testing
@@ -170,6 +169,8 @@ print(v_view)
 s = np.empty((8, 1))
 s_view = neuron_layers.vars["measure"].view
 
+p1_npspike = []
+
 while model.t < 8.0:
     model.step_time()
     neuron_layers.pull_var_from_device("Vmem")
@@ -180,17 +181,26 @@ while model.t < 8.0:
 
     s[model.timestep - 1,:]=s_view[:]
 
+    p1_npspike.append(neuron_layers.current_spikes.shape[0])
+
 fig, axis = plt.subplots()
-axis.plot(v)
-axis.plot(s)
+axis.plot(v, label="Vmem")
+axis.plot(s, label="hT")
 plt.xlabel("pipeline (K)")
-plt.ylabel("Membrane Voltage (Vmem)")
-plt.title("FP Neuron")
+plt.ylabel("Voltage Value")
+plt.title("FP Input Neuron")
 plt.axvline(x=FP_PARAM.get("elim"), color='r', linestyle='dotted')
 plt.axhline(y=0, color='r', linestyle='dotted')
+plt.legend()
 plt.show()
 
 
+plt.title("Spike Train from Input FP Neuron")
+plt.bar(np.arange(8), p1_npspike, 0.1, color='b')
+plt.xlabel("Timestep")
+plt.ylabel("Spike (Bool)")
+plt.legend()
+plt.show()
 
 # ----------------------------------------------------------------------------
 # Testing Playbox

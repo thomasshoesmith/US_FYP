@@ -57,7 +57,7 @@ fs_input_model = create_custom_neuron_class(
 
     $(scaleVal) = $(scale) * (1 << (kInt - ((pipeTimestep % kInt)+1)));
     printf("Vmem:%.6f ", $(Vmem));
-    //printf(" scaleVal:%.6f ", $(scaleVal));
+    printf(" scaleVal:%.6f ", $(scaleVal));
     ''',
     threshold_condition_code='''
     $(Vmem) >= hT
@@ -105,12 +105,12 @@ fs_model = create_custom_neuron_class(
     //printf(" d:%d ", d);
 
     //printf(" pipeTimestep@0:%d ", pipeTimestep);
-
+    printf(" Fx:%.6f ", $(Fx));
     // If this is the first timestep, apply input
     //printf(" pipeTimestep:%d ", pipeTimestep);
     if(pipeTimestep == 0) {
         //printf(" PipeTimestep@0:%d ", pipeTimestep);
-        //printf(" Fx:%.6f ", $(Fx));
+
         $(Vmem) = $(Fx);
         $(Fx) = 0.0;
     }
@@ -183,7 +183,6 @@ model.load()
 # ----------------------------------------------------------------------------
 
 timesteps = 24
-
 
 p1_npspike = []
 p2_npspike = []

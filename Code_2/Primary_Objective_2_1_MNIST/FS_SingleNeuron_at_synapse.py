@@ -31,8 +31,30 @@ fs_WU = create_custom_weight_update_class(
     var_name_types=[("g", "scalar", VarAccess_READ_ONLY)],
     sim_code='''
     $(addToInSyn, $(g));
+    printf(" g:%.6f ", $(g));
+    printf(input_pre);
+    //$(input_pre) < 0.0 && spike
     '''
 )
+
+signed_static_pulse = create_custom_weight_update_class(
+    'signed_static_pulse',
+    var_name_types=[("g", "scalar", VarAccess_READ_ONLY)],
+    sim_code='''
+    $(addToInSyn, $(g));
+    ''',
+    event_code='''
+    $(addToInSyn, -$(g));
+    ''',
+    event_threshold_condition_code='''
+    $(input_pre) < 0.0 && spike
+    '''
+)
+
+
+
+
+
 
 # ----------------------------------------------------------------------------
 # Parameters for FS Input Neuron
@@ -46,7 +68,6 @@ FS_INPUT_PARAM =  {"K":       8.0,      # K timestep length
 # Custom GeNN models
 # Input FS ReLU model
 # ----------------------------------------------------------------------------
-
 fs_input_model = create_custom_neuron_class(
     'fs_relu_input',
     param_names=['K', 'alpha', 'elim'], #k = timesteps, alpha = highest value, elim = length of exponent
@@ -141,11 +162,11 @@ fs_model = create_custom_neuron_class(
     ''',
     is_auto_refractory_required=False)
 
+
 # ----------------------------------------------------------------------------
 # Build model
 # ----------------------------------------------------------------------------
 # Create GeNN model
-
 model = GeNNModel("float", "FS_singleNetwork")
 model.dT = TIMESTEP
 
@@ -157,6 +178,8 @@ ini_input = {"input": 13.6,  # input Value
 # Inital values for second neuron
 ini = {"Fx": 0.0,  # input Value
        "Vmem": 0.0}   # voltage membrane value
+
+
 
 # Create first neuron
 pop1 = model.add_neuron_population("neuron1", 1, fs_input_model, FS_INPUT_PARAM, ini_input)
@@ -171,10 +194,10 @@ pop3 = model.add_neuron_population("neuron3", 1, fs_model, FS_PARAM, ini)
 # Parameters for synapse
 # ----------------------------------------------------------------------------
 
-s_ini = {"g": 1.0}  # weight
+s_ini = {"g": 1.0} #weight
 
 ps_p = {"tau": 0.0, # Decay time constant [ms]
-        "E": 0.0}   # Reversal potential [mV]
+        "E": 0.0} # Reversal potential [mV]
 
 # synapse connection between neurons 1 & 2
 model.add_synapse_population(
@@ -198,6 +221,7 @@ model.load()
 # ----------------------------------------------------------------------------
 
 timesteps = 24
+
 
 p1_npspike = []
 p2_npspike = []
@@ -296,7 +320,55 @@ axis[2].bar(np.arange(timesteps), p2_npspike, 0.1, color='r', label = "Neuron 2 
 axis[2].bar(np.arange(timesteps), p3_npspike, 0.1, color='g', label = "Nauron 3 Spikes")
 axis[2].legend()
 
+
+
 plt.xlabel("pipeline (K)")
 plt.ylabel("Membrane Voltage (Vmem)")
 
 plt.show()
+
+#print(p1_npspike)
+
+# ----------------------------------------------------------------------------
+# Testing Playbox | code cemetery
+# ----------------------------------------------------------------------------
+
+"""
+def getSpikeTrain():
+    z = []
+    if ini.get("input") > s[0]:
+        z.append("1")
+    else:
+        z.append("0")
+
+    for i in range(len(v)-1):
+        if v[i] >= s[i+1]:
+            z.append("1")
+        else:
+            z.append("0")
+    return z
+
+print("fs conversion\n\n",ini.get("input"), "->", ''.join(getSpikeTrain()))"""
+
+
+"""
+## TODO: Graph not displaying expected results.
+
+Shouldn't Fx be delayed by x_timesteps
+"""
+
+
+"""
+// Notes on adding a synapse pop
+model.add_synapse_population("Pop1self", "SPARSE_GLOBALG", 10 =(delay, "NO_DELAY", or just put 0),
+    pop1, pop1, <= connections
+    "StaticPulse" (predefined *update model*, needs creating), {}(parameters), s_ini(synaptic variables), {}(pre), {}(post),
+    "ExpCond" ("DeltaCurr"!, should work), ps_p (parameters), {} (initial values for variables),
+    init_connectivity(ring_model, {})) (initialiser for the connections, default is fully connected)
+"""
+
+# Dan Goodman Imperial
+
+# Sheffield - Stephie
+
+# UCL L

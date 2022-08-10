@@ -60,55 +60,27 @@ if __name__ == '__main__':
 
     # Create, train and evaluate TensorFlow model
     tf_model = models.Sequential([
-        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, input_shape=x_train.shape[1:], 
+        # input layer
+        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, input_shape=x_train.shape[1:],
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.3),
-        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False, 
+
+        # first hidden layer
+        layers.Conv2D(64, 3, padding='same', activation='relu', use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.AveragePooling2D(2),
 
-        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False, 
+        # second hidden layer
+        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False,
                       kernel_initializer=initializer, kernel_regularizer=regularizer),
         layers.Dropout(0.4),
-        layers.Conv2D(128, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.AveragePooling2D(2),
 
-        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.Dropout(0.4),
-        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.Dropout(0.4),
-        layers.Conv2D(256, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.AveragePooling2D(2),
-
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.AveragePooling2D(2),
-
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.Dropout(0.4),
-        layers.Conv2D(512, 3, padding="same", activation="relu", use_bias=False, 
-                      kernel_initializer=initializer, kernel_regularizer=regularizer),
-        layers.AveragePooling2D(2),
-
+        # third hidden layer
         layers.Flatten(),
-        layers.Dense(4096, activation="relu", use_bias=False, kernel_regularizer=regularizer),
+        layers.Dense(256, activation="relu", use_bias=False, kernel_regularizer=regularizer),
         layers.Dropout(0.5),
-        layers.Dense(4096, activation="relu", use_bias=False, kernel_regularizer=regularizer),
-        layers.Dropout(0.5),
+
+        # output layer
         layers.Dense(y_train.max() + 1, activation="softmax", use_bias=False, kernel_regularizer=regularizer),
     ], name='vgg16')
 
@@ -126,9 +98,9 @@ if __name__ == '__main__':
 
         if args.augment_training:
             steps_per_epoch = x_train.shape[0] // 256
-            tf_model.fit(iter_train, steps_per_epoch=steps_per_epoch, epochs=200, callbacks=callbacks)
+            tf_model.fit(iter_train, steps_per_epoch=steps_per_epoch, epochs=1, callbacks=callbacks)
         else:
-            tf_model.fit(x_train, y_train, batch_size=256, epochs=200, shuffle=True, callbacks=callbacks)
+            tf_model.fit(x_train, y_train, batch_size=256, epochs=1, shuffle=True, callbacks=callbacks)
 
         models.save_model(tf_model, 'vgg16_tf_model', save_format='h5')
 
@@ -142,9 +114,9 @@ if __name__ == '__main__':
     # Convert and compile ML GeNN model
     mlg_model = Model.convert_tf_model(
         tf_model, converter=converter, connectivity_type=args.connectivity_type,
-        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed, 
+        dt=args.dt, batch_size=args.batch_size, rng_seed=args.rng_seed,
         kernel_profiling=args.kernel_profiling)
-    
+
     time = 10 if args.converter == 'few-spike' else 2500
     mlg_eval_start_time = perf_counter()
     acc, spk_i, spk_t = mlg_model.evaluate([x_test], [y_test], time, save_samples=args.save_samples)
